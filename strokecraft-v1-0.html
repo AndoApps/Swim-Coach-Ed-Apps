@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>STROKECRAFT v1.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #080810;
+  --dark: #0e0e1a;
+  --card: #13131f;
+  --card2: #1a1a2a;
+  --border: #252535;
+  --border2: #333348;
+  --silver: #7777aa;
+  --silver2: #9999bb;
+  --white: #f0f0ff;
+  --accent: #e040fb;
+  --accent2: #7c4dff;
+  --accent3: #40c4ff;
+  --pink: #e040fb;
+  --purple: #7c4dff;
+  --sky: #40c4ff;
+  --pink-dim: rgba(224,64,251,0.15);
+  --purple-dim: rgba(124,77,255,0.15);
+  --sky-dim: rgba(64,196,255,0.15);
+
+  --cat-found: #1a2a1a;
+  --cat-foundt: #66dd88;
+  --cat-tech: #1a1a3a;
+  --cat-techt: #88aaff;
+  --cat-app: #2a1a1a;
+  --cat-appt: #ffaa66;
+
+  --stroke-free: #e040fb;
+  --stroke-back: #40c4ff;
+  --stroke-breast: #7c4dff;
+  --stroke-fly: #ff6b9d;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+.header {
+  background: var(--dark);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-wrap { display: flex; align-items: center; gap: 10px; }
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--purple), var(--pink));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+
+.logo-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 3px;
+  line-height: 1;
+  background: linear-gradient(90deg, var(--pink), var(--purple), var(--sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.logo-v {
+  font-size: 10px;
+  color: var(--silver);
+  font-family: 'Barlow Condensed', sans-serif;
+  letter-spacing: 2px;
+  -webkit-text-fill-color: var(--silver);
+}
+
+/* SCREENS */
+.screen { display: none; padding: 14px 14px 100px; }
+.screen.active { display: block; }
+
+/* BUTTONS */
+.btn {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  color: var(--silver2);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--silver2); color: var(--white); }
+
+.btn-pink {
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  border: none;
+  color: #fff;
+  font-weight: 700;
+}
+.btn-pink:hover { opacity: 0.88; color: #fff; }
+
+.btn-sky {
+  background: var(--sky-dim);
+  border: 1px solid var(--sky);
+  color: var(--sky);
+}
+
+.btn-full {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  letter-spacing: 3px;
+  border-radius: 10px;
+  margin-top: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* HOME SCREEN */
+.home-hero {
+  text-align: center;
+  padding: 40px 0 30px;
+}
+
+.home-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 52px;
+  letter-spacing: 4px;
+  line-height: 1;
+  background: linear-gradient(90deg, var(--pink), var(--purple), var(--sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.home-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--silver);
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+
+.build-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--sky));
+  border: none;
+  color: #fff;
+  border-radius: 14px;
+  padding: 22px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 4px;
+  cursor: pointer;
+  margin-bottom: 14px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(124,77,255,0.3);
+}
+.build-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(124,77,255,0.45); }
+
+.home-sessions-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--silver);
+  text-transform: uppercase;
+  margin: 20px 0 10px;
+}
+
+.saved-session-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.saved-session-card:hover { border-color: var(--purple); }
+
+.saved-session-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: var(--white);
+}
+.saved-session-meta {
+  font-size: 11px;
+  color: var(--silver);
+  margin-top: 2px;
+}
+
+/* STEP INDICATOR */
+.step-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.step-dot {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border2);
+  transition: background 0.3s;
+}
+.step-dot.active { background: linear-gradient(90deg, var(--pink), var(--purple)); }
+.step-dot.done { background: var(--purple); }
+
+/* SECTION TITLE */
+.section-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.section-sub {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  color: var(--silver);
+  letter-spacing: 1px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+}
+
+/* WARM UP CARDS */
+.warmup-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.warmup-card:hover, .warmup-card.selected {
+  border-color: var(--pink);
+  background: var(--pink-dim);
+}
+.warmup-card.selected { box-shadow: 0 0 0 1px var(--pink); }
+
+.warmup-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--white);
+  margin-bottom: 3px;
+}
+.warmup-desc {
+  font-size: 12px;
+  color: var(--silver2);
+  line-height: 1.4;
+}
+
+/* STROKE SELECTOR */
+.stroke-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stroke-btn {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.stroke-btn:hover { border-color: var(--border2); }
+.stroke-btn.selected-free { border-color: var(--stroke-free); background: rgba(224,64,251,0.1); }
+.stroke-btn.selected-back { border-color: var(--stroke-back); background: rgba(64,196,255,0.1); }
+.stroke-btn.selected-breast { border-color: var(--stroke-breast); background: rgba(124,77,255,0.1); }
+.stroke-btn.selected-fly { border-color: var(--stroke-fly); background: rgba(255,107,157,0.1); }
+
+.stroke-emoji { font-size: 24px; margin-bottom: 4px; }
+.stroke-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+/* CATEGORY TABS */
+.cat-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.cat-tab {
+  flex: 1;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--silver);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s;
+}
+.cat-tab.active-found { background: var(--cat-found); color: var(--cat-foundt); border-color: var(--cat-found); }
+.cat-tab.active-tech { background: var(--cat-tech); color: var(--cat-techt); border-color: var(--cat-tech); }
+.cat-tab.active-app { background: var(--cat-app); color: var(--cat-appt); border-color: var(--cat-app); }
+
+/* DRILL ITEMS */
+.drill-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 13px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.drill-item:hover { border-color: var(--border2); }
+.drill-item.selected { border-color: var(--purple); background: var(--purple-dim); }
+
+.drill-check {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 2px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 12px;
+  transition: all 0.15s;
+}
+.drill-item.selected .drill-check {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: #fff;
+}
+
+.drill-info { flex: 1; min-width: 0; }
+.drill-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--white);
+}
+.drill-cue {
+  font-size: 11px;
+  color: var(--silver);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.drill-info-btn {
+  background: none;
+  border: 1px solid var(--border2);
+  color: var(--silver);
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* BADGE */
+.cat-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.badge-found { background: var(--cat-found); color: var(--cat-foundt); }
+.badge-tech { background: var(--cat-tech); color: var(--cat-techt); }
+.badge-app { background: var(--cat-app); color: var(--cat-appt); }
+
+/* SELECTED DRILLS PANEL */
+.selected-drills-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+.selected-drills-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--silver);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.selected-drill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.selected-drill-row:last-child { border-bottom: none; }
+
+.drag-handle {
+  color: var(--silver);
+  font-size: 14px;
+  cursor: grab;
+  padding: 2px 4px;
+}
+
+.selected-drill-name {
+  flex: 1;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--white);
+}
+
+.move-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--silver);
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.remove-drill-btn {
+  background: none;
+  border: none;
+  color: var(--silver);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.remove-drill-btn:hover { color: #ff5555; }
+
+/* STROKE BLOCKS SUMMARY */
+.stroke-block-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.stroke-block-header {
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.stroke-block-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 2px;
+}
+
+.stroke-block-count {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  color: var(--silver);
+  letter-spacing: 1px;
+}
+
+/* SESSION CARD */
+.session-card-header {
+  text-align: center;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.session-card-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 4px;
+  background: linear-gradient(90deg, var(--pink), var(--purple), var(--sky));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 4px;
+}
+
+.session-warmup-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--sky);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.session-stroke-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.session-stroke-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-stroke-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+
+.session-drill-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.session-drill-row:last-child { border-bottom: none; }
+
+.session-drill-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--white);
+  margin-bottom: 2px;
+}
+
+.session-drill-cue {
+  font-size: 12px;
+  color: var(--silver2);
+  line-height: 1.4;
+}
+
+.session-block-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--silver);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 200;
+  overflow-y: auto;
+  padding: 16px;
+  align-items: flex-start;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+
+.modal {
+  background: var(--dark);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 20px;
+  width: 100%;
+  max-width: 480px;
+  margin: auto;
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-cue {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--sky);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+
+.modal-desc {
+  font-size: 15px;
+  color: var(--silver2);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.modal-close {
+  width: 100%;
+  padding: 12px;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  color: var(--white);
+  border-radius: 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px;
+  cursor: pointer;
+}
+
+/* STROKE COLOR HELPERS */
+.color-free { color: var(--stroke-free); }
+.color-back { color: var(--stroke-back); }
+.color-breast { color: var(--stroke-breast); }
+.color-fly { color: var(--stroke-fly); }
+.border-free { border-left: 3px solid var(--stroke-free); }
+.border-back { border-left: 3px solid var(--stroke-back); }
+.border-breast { border-left: 3px solid var(--stroke-breast); }
+.border-fly { border-left: 3px solid var(--stroke-fly); }
+
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+.empty-state {
+  text-align: center;
+  color: var(--silver);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  letter-spacing: 1px;
+  padding: 20px;
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo-wrap">
+    <div class="logo-icon">🏊</div>
+    <div>
+      <div class="logo-text">STROKECRAFT</div>
+      <div class="logo-v">V1.0 — JUNIOR SQUAD</div>
+    </div>
+  </div>
+  <div id="headerDate" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;"></div>
+</div>
+
+<!-- HOME SCREEN -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <div class="home-title">STROKECRAFT</div>
+    <div class="home-sub">Junior Squad Session Builder</div>
+  </div>
+
+  <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
+
+  <div class="home-sessions-title">SAVED SESSIONS</div>
+  <div id="savedSessionsList">
+    <div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>
+  </div>
+</div>
+
+<!-- BUILD: WARMUP SCREEN -->
+<div class="screen" id="screen-warmup">
+  <div class="step-bar">
+    <div class="step-dot active" id="step1"></div>
+    <div class="step-dot" id="step2"></div>
+    <div class="step-dot" id="step3"></div>
+  </div>
+  <div class="section-title">WARM UP</div>
+  <div class="section-sub">Choose a warm-up option</div>
+
+  <div id="warmupList"></div>
+
+  <div class="divider"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('home')">← BACK</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="goToStrokes()">NEXT: STROKES →</button>
+  </div>
+</div>
+
+<!-- BUILD: STROKE SELECTOR SCREEN -->
+<div class="screen" id="screen-strokes">
+  <div class="step-bar">
+    <div class="step-dot done" id="s-step1"></div>
+    <div class="step-dot active" id="s-step2"></div>
+    <div class="step-dot" id="s-step3"></div>
+  </div>
+  <div class="section-title">STROKE BLOCKS</div>
+  <div class="section-sub">Add 1–4 stroke blocks to your session</div>
+
+  <!-- Added stroke blocks -->
+  <div id="addedBlocksList"></div>
+
+  <div class="stroke-grid" id="strokeGrid">
+    <div class="stroke-btn" onclick="addStrokeBlock('free')">
+      <div class="stroke-emoji">🔵</div>
+      <div class="stroke-label color-free">FREESTYLE</div>
+    </div>
+    <div class="stroke-btn" onclick="addStrokeBlock('back')">
+      <div class="stroke-emoji">🔷</div>
+      <div class="stroke-label color-back">BACKSTROKE</div>
+    </div>
+    <div class="stroke-btn" onclick="addStrokeBlock('breast')">
+      <div class="stroke-emoji">🟣</div>
+      <div class="stroke-label color-breast">BREASTSTROKE</div>
+    </div>
+    <div class="stroke-btn" onclick="addStrokeBlock('fly')">
+      <div class="stroke-emoji">🩷</div>
+      <div class="stroke-label color-fly">BUTTERFLY</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('warmup')">← BACK</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="goToPreview()">PREVIEW SESSION →</button>
+  </div>
+</div>
+
+<!-- BUILD: DRILL PICKER SCREEN -->
+<div class="screen" id="screen-drills">
+  <div class="section-title" id="drillPickerTitle">FREESTYLE DRILLS</div>
+  <div class="section-sub" id="drillPickerSub">Select drills for this block</div>
+
+  <div class="cat-tabs">
+    <div class="cat-tab active-found" id="tab-found" onclick="showDrillCat('foundational',this)">FOUNDATIONAL</div>
+    <div class="cat-tab" id="tab-tech" onclick="showDrillCat('technical',this)">TECHNICAL</div>
+    <div class="cat-tab" id="tab-app" onclick="showDrillCat('application',this)">APPLICATION</div>
+  </div>
+
+  <div id="drillList"></div>
+
+  <div class="divider"></div>
+
+  <!-- Selected drills order panel -->
+  <div class="selected-drills-panel" id="selectedDrillsPanel" style="display:none;">
+    <div class="selected-drills-title">SELECTED DRILLS — DRAG TO REORDER</div>
+    <div id="selectedDrillsOrder"></div>
+  </div>
+
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('strokes')">← BACK</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" id="saveDrillBlockBtn" onclick="saveDrillBlock()">SAVE BLOCK →</button>
+  </div>
+</div>
+
+<!-- SESSION PREVIEW / CARD SCREEN -->
+<div class="screen" id="screen-preview">
+  <div class="session-card-header">
+    <div class="session-card-title">SESSION CARD</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;" id="previewDate"></div>
+  </div>
+  <div id="previewContent"></div>
+  <div style="display:flex;gap:8px;margin-top:6px;">
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('strokes')">← EDIT</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="saveSession()">SAVE SESSION ✓</button>
+  </div>
+</div>
+
+<!-- DRILL INFO MODAL -->
+<div class="modal-overlay" id="drillInfoModal">
+  <div class="modal">
+    <div class="modal-title" id="modalDrillName"></div>
+    <div class="modal-cue" id="modalDrillCue"></div>
+    <div class="modal-desc" id="modalDrillDesc"></div>
+    <div style="margin-bottom:10px;">
+      <span class="cat-badge" id="modalDrillBadge"></span>
+    </div>
+    <button class="modal-close" onclick="closeModal('drillInfoModal')">CLOSE</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DRILL LIBRARY
+// ============================================================
+const DRILLS = {
+  free: [
+    // FOUNDATIONAL
+    { name:'Kick on Board', cue:'Kick on front holding board. Feet below surface, small kicks.', desc:'Hold a kickboard extended in front. Keep feet below the surface, use small fast kicks from the hip. Head down, eyes looking at the bottom. Chin resting on the water surface to breathe.', cat:'foundational' },
+    { name:'L Drill', cue:'One arm front on aid, other points to sky. Kick, eyes down, flat head to breathe.', desc:'One arm rests on a board or pull buoy extended in front. The other arm points straight up to the sky. Kick face down with eyes looking at the pool floor. Head stays flat on the water — chin just above the surface to breathe. Focuses on body position and balance.', cat:'foundational' },
+    { name:'Side Kick', cue:'Kick on side, bottom arm extended, top arm on hip. Balance and rotation.', desc:'Roll to your side and kick. Bottom arm is extended forward underwater, top arm rests on your hip. Keep hips stacked, body flat like a plank. Take 6–10 kicks then rotate to the other side. Develops balance and body rotation awareness.', cat:'foundational' },
+    { name:'Long Dog', cue:'Freestyle arms with underwater recovery, kick from the hip — no bent knees.', desc:'Perform freestyle arm strokes but recover the arm underwater — drive the hand forward under the surface to a long extension out in front, not over the top. Kick from the hip with straight legs, no knee bend. Focus on long smooth strokes and a powerful hip-driven kick. Teaches front-quadrant swimming and a relaxed, efficient pull.', cat:'foundational' },
+
+    // TECHNICAL
+    { name:'Zipper Drill', cue:'One arm extended on aid. Zip thumb up armpit, head down eyes on bottom, zip back down. Repeat.', desc:'Start with one arm extended on a board or pull buoy in front. Head is down, eyes looking at the pool floor. Zip the recovering thumb up the side of your body from hip to armpit — elbow stays high. After reaching the armpit, return the head down with eyes on the bottom, then zip the hand back down and re-extend forward. Repeat each cycle without moving to the L Drill position. Builds high elbow recovery and early vertical forearm.', cat:'technical' },
+    { name:'Scooter Drill', cue:'Single arm free, hand scoots under the buoy before catching and pulling.', desc:'Similar to single arm freestyle, but the recovering hand slides under the pull buoy (or body) before catching the water and pulling through. Forces the swimmer to reach and catch wide before pulling. Great for developing a wide, powerful catch position.', cat:'technical' },
+    { name:'Fists', cue:'Swim freestyle with clenched fists. Feel the forearm catching water.', desc:'Swim normal freestyle but with hands clenched in fists. This removes the hand from the equation and forces the swimmer to feel the forearm and upper arm pressing against the water. When you open the hand after a length, the improved catch sensation is immediate.', cat:'technical' },
+    { name:'Fingernail Drag', cue:'Drag fingertips along the surface during recovery. High elbow focus.', desc:'During the freestyle recovery phase, drag your fingertips lightly along the water surface. This forces a high elbow recovery position and prevents a low swinging arm. Keep the elbow pointed up and out as the fingers trail along the surface back to entry.', cat:'technical' },
+    { name:'Single Arm (arm by side)', cue:'One arm strokes, other at hip. Breathe to NON-stroking side when stroking arm is fully extended.', desc:'One arm performs a full freestyle stroke while the other rests at the hip. Breathe to the non-stroking arm side — the opposite side to the pulling arm — when the stroking arm is fully extended in front. Breathing to the non-stroking side promotes buoyancy when breathing and teaches a balanced body position. Focus on a deep entry and pulling through to full extension.', cat:'technical' },
+    { name:'Single Arm (arm in front)', cue:'One arm strokes, other extended front. Recovering arm extends beyond the lead hand before pulling.', desc:'One arm strokes while the other stays extended forward underwater. The recovering arm must return to the front and extend beyond the lead hand before catching and pulling. This exaggerates the reach and front-quadrant overlap. Focuses on entry, reach, and the timing of the catch. More stable than the arm-by-side version.', cat:'technical' },
+    { name:'Catch-up', cue:'Wait for hands to touch before next stroke. Exaggerates timing and glide.', desc:'Swim freestyle but the recovering arm must wait at the front — fully extended — until the other hand catches up and touches it. Then that arm pulls while the first one waits. Exaggerates the glide phase and improves stroke timing. Slows the stroke rate down intentionally.', cat:'technical' },
+    { name:'Ice Skater', cue:'Like catch-up, focus on arm glide after entry. Time the pull with the glide.', desc:'Similar to catch-up but the focus is on the glide of the lead arm after entry — feel it slide forward before initiating the pull. The pull timing should correspond with the end of the glide, not start immediately. Named after the long glide between pushes of an ice skater. Develops front-quadrant timing.', cat:'technical' },
+    { name:'6-Kick Switch', cue:'6 freestyle flutter kicks on side, rotate and take a stroke. Balance and rotation.', desc:'Balance on your side with the bottom arm extended forward and take 6 freestyle flutter kicks — not dolphin kicks. Then rotate to the other side with a single arm stroke and repeat. Focuses on body rotation, balance on the side, and the connection between rotation and the pull. Keep the head still and hips up throughout the kick phase.', cat:'technical' },
+    { name:'Shark Fin', cue:'Pause elbow high at surface during recovery. Entry from high position.', desc:'During the freestyle recovery, pause when the elbow reaches the highest point — it should look like a shark fin sticking out of the water. Hold for a moment, then drive the hand forward and enter. Promotes high elbow recovery and prevents dropped elbow entry.', cat:'technical' },
+    { name:'3 Point Touch', cue:'Hip → sky → shoulder → sky → head → extend forward. Other arm pulls through.', desc:'During the freestyle recovery, the hand touches three checkpoints in sequence: touch the hip, extend to the sky, touch the shoulder, extend to the sky again, touch the head, then extend out in front — at which point the other arm pulls through. Choreographs the recovery path deliberately. Excellent for swimmers with a wide swinging arm recovery. Slows down the movement to ingrain the correct high-elbow path.', cat:'technical' },
+
+    // APPLICATION
+    { name:'Polo (Head-up)', cue:'Head up and forward the whole length. Forces strong pull to stay up.', desc:'Swim freestyle with the head held up looking forward — like a water polo player. To keep the head up, the pull must be powerful and the hips must be strong. The head going up forces the hips down — swimmers must fight this. Great for developing catch and pull strength.', cat:'application' },
+    { name:'Straight Arm', cue:'High straight arm recovery — swing arm high over the water. Feel the increased rotation.', desc:'Swim freestyle with a straight arm recovery — swing the arm high over the water in a wide arc rather than the usual bent elbow recovery. This increases the body rotation requirement significantly. Useful for swimmers who need to feel more rotation, or as a contrast drill before returning to normal technique. The arm stays straight and swings up and over, not low like a windmill.', cat:'application' },
+    { name:'7-3-7', cue:'7 kicks on side, 3 strokes, 7 kicks other side. Rhythm and balance.', desc:'Balance on your side and kick for 7 kicks, then take 3 freestyle strokes and arrive on the other side, kick for 7 more kicks, then 3 strokes back. Develops body rotation awareness, balance, and the connection between side-lying position and the freestyle stroke rhythm.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+  ],
+
+  back: [
+    // FOUNDATIONAL
+    { name:'Kick on Back', cue:'Kick on back, arms extended in streamline behind the head. Toes breaking surface.', desc:'Float on your back with arms extended in streamline position behind the head — both arms pressed together overhead. Perform backstroke flutter kick. Toes should just break the surface — not kick above it. Hips up, core engaged, head still and neutral. The kick drives from the hip, not the knee. Streamline arms force the body into a flat, efficient position.', cat:'foundational' },
+    { name:'Side Kick (Back)', cue:'Kick on side, one arm extended behind head, rotate and stroke.', desc:'Roll to your side — one arm extended behind the head in line with the body, other arm at hip. Kick backstroke kick. Take 6 kicks then rotate to backstroke position with a single arm stroke. Develops balance, hip rotation, and connection between side position and backstroke pull.', cat:'foundational' },
+    { name:'Bucket Drill', cue:'Rest a pull buoy flat on your chest. Forces flat body position and strong kick.', desc:'Place a pull buoy flat on your chest and swim backstroke. The buoy resting on the chest forces you to keep your body flat and hips up — if the hips drop or the body angles, the buoy slides off. Excellent for developing body position awareness and a strong, consistent kick. Provides instant feedback when technique drops.', cat:'foundational' },
+
+    // TECHNICAL
+    { name:'OK Drill', cue:'Thumb exits first, pinky enters first. Hand orientation focus.', desc:'Swim backstroke focusing on hand orientation: thumb exits the water first on the finish, and pinky finger enters the water first on entry. This positions the hand for a better catch. The "OK" in the drill name refers to making an OK sign with your hand — thumb and index finger touching in a circle — which is the shape your hand makes when the thumb leads out and the pinky leads in. Critical for backstroke efficiency and catch angle.', cat:'technical' },
+    { name:'Single Arm (Back)', cue:'One arm strokes, other stays by side. Focus on deep entry and stroking shoulder clearing the water.', desc:'One arm performs the full backstroke stroke cycle while the other rests by the side of the body. Focus on two key points: a deep entry with the recovering hand (pinky in, reaching far back), and the stroking arm\'s shoulder visibly clearing the water on the recovery. The shoulder coming out of the water indicates proper body rotation. 6–8 kicks between each stroke. Alternate lengths.', cat:'technical' },
+    { name:'6-Kick Switch (Back)', cue:'6 kicks on side, rotate and take a backstroke. Same as free version.', desc:'Balance on your side — one arm extended behind, other at hip — and take 6 backstroke kicks. Then rotate and take a single backstroke stroke to the other side. 6 more kicks, then repeat. Develops rotation and timing of the backstroke pull relative to body position.', cat:'technical' },
+    { name:'Penguin Drill', cue:'Both elbows stay attached to sides of body throughout recovery. Forearms only recover.', desc:'During the backstroke recovery, both elbows remain in contact with the sides of the body — they do not lift away. Only the forearms recover, hinging from the elbow. This creates a very controlled, compact recovery that keeps the arms close and prevents a wide swinging motion. Excellent for swimmers who throw their arms wide or lose control of the recovery path.', cat:'technical' },
+    { name:'2L-2R', cue:'2 strokes left arm, 2 strokes right arm. Non-stroking arm by side, extends above head on 2nd stroke to commence its turn.', desc:'Swim 2 consecutive strokes with the left arm while the right arm rests by the side, then 2 strokes with the right arm while the left rests by the side. The non-stroking arm stays by the side of the body. On the 2nd stroke of the opposite arm, the resting arm begins to extend above the head — so it is ready to commence its 2 strokes immediately after. Develops strength, rhythm, and bilateral balance.', cat:'technical' },
+    { name:'Catch-up (Back)', cue:'Wait for hands to touch behind head before next stroke. Exaggerates glide.', desc:'The recovering arm must reach behind the head and touch the other hand before that arm begins its stroke. Creates an exaggerated glide and slows the stroke right down. Improves timing and feel for the extended position. Arms should be fully extended, not crossed.', cat:'technical' },
+    // APPLICATION
+    { name:'Spin Drill', cue:'Fast arm turnover, focus on entry and catch. Contrast with slow drills.', desc:'Swim backstroke with a deliberately fast arm turnover — spin the arms as quickly as possible. Focus on clean entry and immediate catch rather than power. Great as a contrast drill after slow technical work — the body feels the difference and finds a middle ground. Also builds turnover rate.', cat:'application' },
+    { name:'7-3-7 (Back)', cue:'7 kicks on side, 3 backstroke strokes, 7 kicks other side.', desc:'Balance on your side in backstroke position and kick for 7 kicks, then take 3 backstroke strokes and arrive on the other side. 7 more kicks, then 3 strokes back. Connects side-lying balance to the full backstroke cycle. Develops rotation timing and body awareness.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+  ],
+
+  breast: [
+    // FOUNDATIONAL
+    { name:'Kick on Back (Breast)', cue:'Kick on back, knees stay under surface. Feel the squeeze and glide.', desc:'Float on your back and perform breaststroke kick. Knees must not break the surface — keep them under the water. Heels draw up to the glutes, then kick out and around in a circular motion and squeeze together. You should feel a glide phase when legs are straight. Eyes look up to the ceiling.', cat:'foundational' },
+    { name:'Kick on Front (arms by side)', cue:'Arms by side, heels draw to glutes as the starting motion. Narrow kick is correct.', desc:'Float face down with arms by your side. Perform breaststroke kick — the starting motion is heels drawing up to the glutes, knees stay under the surface and relatively narrow. From there, feet turn out and kick around and back in a circular sweep before squeezing together in streamline. A narrow kick is correct technique — do not force the knees wide. Breathe by lifting head forward. Great for isolating and feeling the kick pattern.', cat:'foundational' },
+    { name:'Wall Kick', cue:'Hold the wall, kick reps. Lets coach see and correct feet directly.', desc:'Hold the wall with both hands and perform repeated breaststroke kicks. The coach can watch the feet from above or below. Common corrections: knees too wide, heels not coming up enough, toes not turning out, no glide phase. Great for isolated feedback and repetition of the kick pattern.', cat:'foundational' },
+    { name:'Scull + Kick', cue:'Arms sculling, legs doing breaststroke kick. Isolates kick with momentum.', desc:'Arms scull continuously — small figure-eight movements in front — while performing breaststroke kick normally. The sculling generates some forward momentum so the drill feels more like swimming. Allows the swimmer to focus entirely on the kick without worrying about the pull timing.', cat:'foundational' },
+
+    // TECHNICAL
+    { name:'1L-1R-1Both', cue:'1 kick left leg, 1 right leg, 1 both. Fixes asymmetric kick.', desc:'Perform breaststroke kick but alternate: one kick with the left leg only, one kick with the right leg only, then one kick with both legs together. Identifies and corrects asymmetric kickers who have a dominant leg. The isolations reveal which side is weaker or different. Repeat continuously.', cat:'technical' },
+    { name:'Cross-Hand Drill', cue:'Grab left foot with right hand behind back, swim one length. Reverse back.', desc:'Reach behind your back and grab your left foot with your right hand. Now swim breaststroke with one arm only using the other arm for the full length. On the way back, switch — right foot in left hand. Extreme hip flexibility and knee tracking drill. Creates unusual body awareness of the kick mechanics.', cat:'technical' },
+    { name:'2K-1P', cue:'Two kicks per one pull. Slows the pull, forces glide phase.', desc:'Swim breaststroke with two kicks for every one pull. This slows the pull right down, forces a glide phase after each kick, and prevents the rushing tendency most junior swimmers have. The timing becomes: kick-kick-pull rather than the usual kick-pull. Excellent for developing feel for the glide.', cat:'technical' },
+    { name:'BR Pause Drill', cue:'Full pause in extended position before pulling. Exaggerates glide.', desc:'Swim breaststroke but add a deliberate, extended pause when both arms are fully extended in front — count 1-2-3 before initiating the pull. Forces a glide phase. Prevents the pulling hands from dropping before the kick is complete. The arms should be streamlined and extended, not scooping prematurely. Excellent for developing feel for the glide and correcting a rushed stroke.', cat:'technical' },
+    { name:'Fingertip Lead', cue:'Pull with just fingertips, forces wider catch before pulling in.', desc:'Perform the breaststroke pull but only use the fingertips — imagine the palms have been removed. This forces the hands to press wide and out before pulling in, preventing the common narrow straight-back pull. Develops a proper wide catch position. Graduate to full hands after several lengths.', cat:'technical' },
+
+    // APPLICATION
+    { name:'Tarzan Breaststroke', cue:'Head up breaststroke. Forces pull to generate lift and drive.', desc:'Swim breaststroke with the head held up looking forward the entire length — like Tarzan swimming through the jungle. To keep the head up, the pull must be powerful and generate real forward and upward drive. Hips will drop — the swimmer must compensate with a strong kick. Excellent power developer.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+  ],
+
+  fly: [
+    // FOUNDATIONAL
+    { name:'Superman Kick', cue:'Arms extended front, pure dolphin kick. Feel body undulation.', desc:'Push off the wall in streamline and perform dolphin kick with arms extended forward — like Superman flying. Focus entirely on the undulation of the body: chest presses down, hips come up, then hips press down and feet kick up. The wave travels from chest to feet. Breathe every 4–6 kicks.', cat:'foundational' },
+    { name:'Chest Press Kick', cue:'Arms resting on a kickboard (not holding it). Press chest down to drive hips up.', desc:'Rest your arms on top of a kickboard — do not grip it. Focus on pressing the chest down into the water to drive the hips upward. The kick comes from the hips rising — not just the feet moving. This is the fundamental undulation cue for butterfly. Resting (not holding) the board keeps the arms relaxed and keeps the focus entirely on the body wave. Without this chest-press action, butterfly becomes flat and inefficient.', cat:'foundational' },
+
+    // TECHNICAL
+    { name:'Single Arm Fly', cue:'One arm pulls, other extended front. 2 kicks per cycle — kick on hand entry, kick on hand exit.', desc:'One arm performs a full butterfly stroke while the other remains extended in front. Two dolphin kicks per stroke cycle: the first kick happens as the hand enters the water at the front, the second kick happens as the hand exits at the back of the pull. This timing is the foundation of butterfly rhythm. Breathe to the side of the stroking arm. Alternate arms each length.', cat:'technical' },
+    { name:'3-Kick Fly', cue:'Kick on entry, middle kick (arms front, press chest), kick on exit. Slows it right down.', desc:'Swim butterfly with three dolphin kicks per arm stroke. Timing: first kick as hands enter at the front, second kick while arms are extended in front (press the chest down during this kick), third kick as hands exit at the back of the pull. The middle kick with arms held in front is key — it reinforces the chest-press undulation. Slows the stroke down and builds feel for each phase separately.', cat:'technical' },
+    { name:'2-2-2', cue:'2 left arm, 2 right arm, 2 both arms. Classic isolation sequence.', desc:'Swim 2 strokes with the left arm only (right arm extended front), then 2 strokes with the right arm only (left arm extended front), then 2 full butterfly strokes with both arms. Repeat continuously. Classic butterfly isolation sequence that builds feel for each arm and then combines. Arms extended when not stroking.', cat:'technical' },
+    { name:'Biondi Drill', cue:'Full pull, arms hold at hips as head submerges. Slow recovery before next pull.', desc:'Perform a full butterfly pull — but as the head goes underwater after the breath, both arms hold at the hips rather than immediately recovering. Hold here for a moment, then slowly recover the arms forward before the next pull. Develops feel for the finish of the pull and prevents a rushed recovery. Named after Matt Biondi.', cat:'technical' },
+    { name:'6K-1Pull', cue:'6 dolphin kicks then one full stroke. Forces breath at the start of the pull, not the end.', desc:'Take 6 dolphin kicks in streamline position, then perform one complete butterfly stroke. Repeat continuously. The extended kick phase before each stroke builds kick strength and highlights the kick-to-pull timing connection. Importantly, the breath is taken at the start of the pull — as the hands begin their sweep outward — not at the end. This trains correct butterfly breathing timing and prevents late breathing which disrupts the stroke.', cat:'technical' },
+
+    // APPLICATION
+    { name:'2Fly-2Breast', cue:'2 butterfly strokes then 2 breaststroke. Rhythm and timing contrast.', desc:'Alternate 2 full butterfly strokes with 2 breaststroke strokes continuously. The transition between strokes develops timing awareness and rhythm. The breaststroke gives recovery time, making the fly strokes more achievable. Good for building confidence and endurance in butterfly without full stroke overload.', cat:'application' },
+    { name:'Heads-up Fly', cue:'Head stays up the whole length. Forces powerful pull to generate lift.', desc:'Swim butterfly with the head held up looking forward — do not submerge the head at all. To keep the head up, the pull must be explosive and generate significant forward drive. The kick becomes critical. Great for developing power and the feeling of driving forward with the pull rather than just moving arms.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+  ]
+};
+
+const WARMUP_OPTIONS = [
+  { name:'200 Freestyle', desc:'4 laps (50m pool) or 8 laps (25m pool) easy freestyle. Own pace. Focus on long smooth strokes and relaxed breathing.', dist:'200m' },
+  { name:'300 Choice + Kick', desc:'200m choice of stroke (own pace), then 100m kick. 6 laps choice + 2 laps kick (50m pool) or 12 laps + 4 laps (25m pool).', dist:'300m' },
+  { name:'300 Freestyle', desc:'6 laps (50m pool) or 12 laps (25m pool) easy freestyle. Slightly more advanced groups. Long, relaxed and smooth.', dist:'300m' },
+  { name:'8x25 IM Order', desc:'2 laps each stroke in IM order: butterfly, backstroke, breaststroke, freestyle. Own pace, focus on feel for each stroke.', dist:'200m' },
+  { name:'200 Drill/Swim by 25', desc:'Alternate 25m any drill / 25m easy swim. Athletes choose their own drill. 4 laps (50m pool) or 8 laps (25m pool).', dist:'200m' },
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let session = {
+  warmup: null,
+  blocks: [], // { stroke, drills: [{...drill}] }
+  name: ''
+};
+
+let currentEditingBlock = null; // index of block being edited, or 'new'
+let currentEditingStroke = null;
+let currentDrillCat = 'foundational';
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// ============================================================
+// HOME
+// ============================================================
+function startBuild() {
+  session = { warmup: null, blocks: [], name: '' };
+  renderWarmupList();
+  showScreen('warmup');
+}
+
+function renderSavedSessions() {
+  const saved = loadFromStorage('sc_sessions') || [];
+  const el = document.getElementById('savedSessionsList');
+  if (saved.length === 0) {
+    el.innerHTML = `<div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>`;
+    return;
+  }
+  el.innerHTML = saved.map((s, i) => `
+    <div class="saved-session-card" onclick="loadSavedSession(${i})">
+      <div>
+        <div class="saved-session-name">${s.name || 'Untitled Session'}</div>
+        <div class="saved-session-meta">${s.blocks.length} stroke block${s.blocks.length !== 1 ? 's' : ''} · ${s.savedAt ? new Date(s.savedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
+      </div>
+      <div style="color:var(--silver);font-size:18px;">›</div>
+    </div>`).join('');
+}
+
+function loadSavedSession(idx) {
+  const saved = loadFromStorage('sc_sessions') || [];
+  session = JSON.parse(JSON.stringify(saved[idx]));
+  renderPreview();
+  showScreen('preview');
+}
+
+// ============================================================
+// WARMUP
+// ============================================================
+function renderWarmupList() {
+  const el = document.getElementById('warmupList');
+  el.innerHTML = WARMUP_OPTIONS.map((w, i) => `
+    <div class="warmup-card ${session.warmup === i ? 'selected' : ''}" onclick="selectWarmup(${i},this)">
+      <div class="warmup-name">${w.name} <span style="color:var(--silver);font-size:12px;font-family:'Barlow Condensed',sans-serif;">${w.dist}</span></div>
+      <div class="warmup-desc">${w.desc}</div>
+    </div>`).join('');
+}
+
+function selectWarmup(idx, el) {
+  session.warmup = idx;
+  document.querySelectorAll('.warmup-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function goToStrokes() {
+  if (session.warmup === null) {
+    // Auto-select first if none chosen
+    session.warmup = 0;
+    renderWarmupList();
+  }
+  renderAddedBlocks();
+  showScreen('strokes');
+}
+
+// ============================================================
+// STROKE BLOCKS
+// ============================================================
+const STROKE_LABELS = { free:'FREESTYLE', back:'BACKSTROKE', breast:'BREASTSTROKE', fly:'BUTTERFLY' };
+const STROKE_COLORS = { free:'var(--stroke-free)', back:'var(--stroke-back)', breast:'var(--stroke-breast)', fly:'var(--stroke-fly)' };
+const STROKE_EMOJIS = { free:'🔵', back:'🔷', breast:'🟣', fly:'🩷' };
+
+function renderAddedBlocks() {
+  const el = document.getElementById('addedBlocksList');
+  if (session.blocks.length === 0) {
+    el.innerHTML = `<div class="empty-state" style="margin-bottom:10px;">No stroke blocks added yet.<br>Tap a stroke below to add one.</div>`;
+    return;
+  }
+  el.innerHTML = session.blocks.map((block, i) => `
+    <div class="stroke-block-card">
+      <div class="stroke-block-header" style="border-left:3px solid ${STROKE_COLORS[block.stroke]};">
+        <div>
+          <div class="stroke-block-label" style="color:${STROKE_COLORS[block.stroke]};">${STROKE_EMOJIS[block.stroke]} ${STROKE_LABELS[block.stroke]}</div>
+          <div class="stroke-block-count">${block.drills.length} drill${block.drills.length !== 1 ? 's' : ''} selected</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn" style="padding:6px 10px;font-size:11px;" onclick="editBlock(${i})">EDIT</button>
+          <button class="btn" style="padding:6px 10px;font-size:11px;color:#ff5555;border-color:#ff5555;" onclick="removeBlock(${i})">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addStrokeBlock(stroke) {
+  if (session.blocks.length >= 4) {
+    alert('Maximum 4 stroke blocks per session.');
+    return;
+  }
+  // Don't push yet — only save if drills are selected
+  currentEditingBlock = 'new';
+  currentEditingStroke = stroke;
+  openDrillPicker(stroke);
+}
+
+function editBlock(idx) {
+  currentEditingBlock = idx;
+  currentEditingStroke = session.blocks[idx].stroke;
+  openDrillPicker(session.blocks[idx].stroke);
+}
+
+function removeBlock(idx) {
+  session.blocks.splice(idx, 1);
+  renderAddedBlocks();
+}
+
+function openDrillPicker(stroke) {
+  const labels = STROKE_LABELS[stroke];
+  document.getElementById('drillPickerTitle').textContent = labels + ' DRILLS';
+  document.getElementById('drillPickerSub').textContent = 'Select drills for this block — tap ⓘ for details';
+  currentDrillCat = 'foundational';
+  // Reset tabs
+  document.getElementById('tab-found').className = 'cat-tab active-found';
+  document.getElementById('tab-tech').className = 'cat-tab';
+  document.getElementById('tab-app').className = 'cat-tab';
+
+  // Reset pendingDrills for new blocks
+  if (currentEditingBlock === 'new') {
+    pendingDrills = [];
+  }
+
+  renderDrillList(stroke, 'foundational');
+  renderSelectedDrillsOrder();
+  showScreen('drills');
+}
+
+function showDrillCat(cat, tabEl) {
+  currentDrillCat = cat;
+  const tabs = document.querySelectorAll('.cat-tab');
+  tabs.forEach(t => t.className = 'cat-tab');
+  if (cat === 'foundational') tabEl.className = 'cat-tab active-found';
+  else if (cat === 'technical') tabEl.className = 'cat-tab active-tech';
+  else tabEl.className = 'cat-tab active-app';
+  renderDrillList(currentEditingStroke, cat);
+}
+
+function renderDrillList(stroke, cat) {
+  const drills = DRILLS[stroke].filter(d => d.cat === cat);
+  const currentDrills = getActiveDrills();
+  const selectedNames = currentDrills.map(d => d.name);
+
+  const el = document.getElementById('drillList');
+  if (drills.length === 0) {
+    el.innerHTML = `<div class="empty-state">No drills in this category.</div>`;
+    return;
+  }
+
+  el.innerHTML = drills.map(drill => {
+    const isSelected = selectedNames.includes(drill.name);
+    const catBadge = cat === 'foundational' ? 'badge-found' : cat === 'technical' ? 'badge-tech' : 'badge-app';
+    return `
+    <div class="drill-item ${isSelected ? 'selected' : ''}" id="drill-${sanitizeId(drill.name)}" onclick="toggleDrill('${stroke}','${cat}','${drill.name.replace(/'/g,"\\'")}')">
+      <div class="drill-check">${isSelected ? '✓' : ''}</div>
+      <div class="drill-info">
+        <div class="drill-name">${drill.name}</div>
+        <div class="drill-cue">${drill.cue}</div>
+      </div>
+      <button class="drill-info-btn" onclick="event.stopPropagation();showDrillInfo('${stroke}','${drill.name.replace(/'/g,"\\'")}')">ⓘ</button>
+    </div>`;
+  }).join('');
+}
+
+function sanitizeId(name) {
+  return name.replace(/[^a-zA-Z0-9]/g, '_');
+}
+
+function toggleDrill(stroke, cat, drillName) {
+  const block = session.blocks[currentEditingBlock];
+  if (!block) return;
+
+  const drill = DRILLS[stroke].find(d => d.name === drillName);
+  if (!drill) return;
+
+  const idx = block.drills.findIndex(d => d.name === drillName);
+  if (idx >= 0) {
+    block.drills.splice(idx, 1);
+  } else {
+    block.drills.push({...drill});
+  }
+
+  renderDrillList(stroke, currentDrillCat);
+  renderSelectedDrillsOrder();
+}
+
+// For new blocks, drills are stored in pendingDrills until saved
+let pendingDrills = [];
+
+function getActiveDrills() {
+  if (currentEditingBlock === 'new') return pendingDrills;
+  return session.blocks[currentEditingBlock]?.drills || [];
+}
+
+function toggleDrill(stroke, cat, drillName) {
+  const drills = getActiveDrills();
+  const drill = DRILLS[stroke].find(d => d.name === drillName);
+  if (!drill) return;
+
+  const idx = drills.findIndex(d => d.name === drillName);
+  if (idx >= 0) {
+    drills.splice(idx, 1);
+  } else {
+    drills.push({...drill});
+  }
+
+  renderDrillList(stroke, currentDrillCat);
+  renderSelectedDrillsOrder();
+}
+
+function renderSelectedDrillsOrder() {
+  const drills = getActiveDrills();
+  const panel = document.getElementById('selectedDrillsPanel');
+  const orderEl = document.getElementById('selectedDrillsOrder');
+
+  if (!drills || drills.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = 'block';
+  orderEl.innerHTML = drills.map((drill, i) => `
+    <div class="selected-drill-row">
+      <span class="drag-handle">≡</span>
+      <div style="flex:1;">
+        <div class="selected-drill-name">${drill.name}</div>
+        <span class="cat-badge badge-${drill.cat === 'foundational' ? 'found' : drill.cat === 'technical' ? 'tech' : 'app'}">${drill.cat}</span>
+      </div>
+      <button class="move-btn" onclick="moveDrill(${i},-1)">↑</button>
+      <button class="move-btn" onclick="moveDrill(${i},1)">↓</button>
+      <button class="remove-drill-btn" onclick="removeDrill(${i})">✕</button>
+    </div>`).join('');
+}
+
+function moveDrill(idx, dir) {
+  const drills = getActiveDrills();
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= drills.length) return;
+  [drills[idx], drills[newIdx]] = [drills[newIdx], drills[idx]];
+  renderSelectedDrillsOrder();
+}
+
+function removeDrill(idx) {
+  const drills = getActiveDrills();
+  drills.splice(idx, 1);
+  renderDrillList(currentEditingStroke, currentDrillCat);
+  renderSelectedDrillsOrder();
+}
+
+function saveDrillBlock() {
+  if (currentEditingBlock === 'new') {
+    // Only save if drills were selected
+    if (pendingDrills.length > 0) {
+      session.blocks.push({ stroke: currentEditingStroke, drills: [...pendingDrills] });
+    }
+    pendingDrills = [];
+  } else {
+    // Editing existing — remove if empty
+    const block = session.blocks[currentEditingBlock];
+    if (block && block.drills.length === 0) {
+      session.blocks.splice(currentEditingBlock, 1);
+    }
+  }
+  renderAddedBlocks();
+  showScreen('strokes');
+}
+
+function showDrillInfo(stroke, drillName) {
+  const drill = DRILLS[stroke].find(d => d.name === drillName);
+  if (!drill) return;
+  document.getElementById('modalDrillName').textContent = drill.name;
+  document.getElementById('modalDrillCue').textContent = drill.cue;
+  document.getElementById('modalDrillDesc').textContent = drill.desc;
+  const badgeClass = drill.cat === 'foundational' ? 'badge-found' : drill.cat === 'technical' ? 'badge-tech' : 'badge-app';
+  document.getElementById('modalDrillBadge').className = `cat-badge ${badgeClass}`;
+  document.getElementById('modalDrillBadge').textContent = drill.cat.toUpperCase();
+  document.getElementById('drillInfoModal').classList.add('active');
+}
+
+// ============================================================
+// PREVIEW & SESSION CARD
+// ============================================================
+function goToPreview() {
+  if (session.blocks.length === 0) {
+    alert('Add at least one stroke block before previewing.');
+    return;
+  }
+  renderPreview();
+  showScreen('preview');
+}
+
+function renderPreview() {
+  const wu = WARMUP_OPTIONS[session.warmup];
+  const now = new Date();
+  document.getElementById('previewDate').textContent = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+
+  let html = '';
+
+  // Warmup block
+  if (wu) {
+    html += `
+    <div class="session-warmup-block">
+      <div class="session-block-label">WARM UP</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--white);margin-bottom:4px;">${wu.name} <span style="color:var(--sky);font-size:14px;">${wu.dist}</span></div>
+      <div style="font-size:13px;color:var(--silver2);line-height:1.5;">${wu.desc}</div>
+    </div>`;
+  }
+
+  // Stroke blocks
+  session.blocks.forEach((block, bi) => {
+    const color = STROKE_COLORS[block.stroke];
+    const label = STROKE_LABELS[block.stroke];
+    const emoji = STROKE_EMOJIS[block.stroke];
+
+    html += `
+    <div class="session-stroke-block">
+      <div class="session-stroke-header border-${block.stroke}">
+        <div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:2px;">BLOCK ${bi + 1}</div>
+          <div class="session-stroke-title" style="color:${color};">${emoji} ${label}</div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);">${block.drills.length} DRILLS</div>
+      </div>
+      ${block.drills.map(drill => {
+        const catClass = drill.cat === 'foundational' ? 'badge-found' : drill.cat === 'technical' ? 'badge-tech' : 'badge-app';
+        return `
+        <div class="session-drill-row" onclick="showDrillInfo('${block.stroke}','${drill.name.replace(/'/g,"\\'")}')">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+            <div class="session-drill-name">${drill.name}</div>
+            <span class="cat-badge ${catClass}">${drill.cat.substring(0,5)}</span>
+          </div>
+          <div class="session-drill-cue">${drill.cue}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+
+  document.getElementById('previewContent').innerHTML = html;
+}
+
+function saveSession() {
+  const saved = loadFromStorage('sc_sessions') || [];
+  const name = `${session.blocks.map(b => STROKE_LABELS[b.stroke].substring(0,2)).join('+')} Session`;
+  session.name = name;
+  session.savedAt = new Date().toISOString();
+  saved.unshift(JSON.parse(JSON.stringify(session)));
+  saveToStorage('sc_sessions', saved);
+  renderSavedSessions();
+
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = 'SAVED ✓';
+  btn.style.background = '#1a3a1a';
+  setTimeout(() => {
+    btn.textContent = orig;
+    btn.style.background = '';
+    showScreen('home');
+  }, 1500);
+}
+
+// ============================================================
+// STORAGE
+// ============================================================
+function saveToStorage(key, data) {
+  try { localStorage.setItem(key, JSON.stringify(data)); } catch(e) {}
+}
+function loadFromStorage(key) {
+  try {
+    const d = localStorage.getItem(key);
+    return d ? JSON.parse(d) : null;
+  } catch(e) { return null; }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+const now = new Date();
+document.getElementById('headerDate').textContent =
+  now.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }).toUpperCase();
+renderSavedSessions();
+</script>
+</body>
+</html>
