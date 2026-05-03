@@ -677,7 +677,7 @@ body {
     <div class="logo-icon">🏊</div>
     <div>
       <div class="logo-text">STROKECRAFT</div>
-      <div class="logo-v">V1.2 — JUNIOR SQUAD</div>
+      <div class="logo-v">V2.0 — JUNIOR SQUAD</div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
@@ -701,9 +701,17 @@ body {
     <div id="sharedSessionsList"></div>
   </div>
 
-  <div class="home-sessions-title">MY SESSIONS</div>
-  <div id="savedSessionsList">
-    <div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>
+  <div class="home-sessions-title">UPCOMING</div>
+  <div id="upcomingSessionsList">
+    <div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>
+  </div>
+
+  <div id="archiveSection" style="margin-top:6px;">
+    <div class="home-sessions-title" onclick="toggleArchive()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;">
+      <span>ARCHIVE</span>
+      <span id="archiveChevron" style="font-size:14px;color:var(--silver);">▶</span>
+    </div>
+    <div id="archiveSessionsList" style="display:none;"></div>
   </div>
 </div>
 
@@ -955,14 +963,21 @@ body {
 // ============================================================
 const ADMIN_PIN = '0000';
 const CLUB_PIN  = '0001';
-let currentRole = null; // 'admin' | 'coach'
+const TEST_PIN  = '9999';
+let currentRole = null; // 'admin' | 'coach' | 'test'
+let currentClubId = 'runaway_bay';
 
 function submitAuth() {
   const pin = document.getElementById('authPinInput').value.trim();
   if (pin === ADMIN_PIN) {
     currentRole = 'admin';
+    currentClubId = 'runaway_bay';
   } else if (pin === CLUB_PIN) {
     currentRole = 'coach';
+    currentClubId = 'runaway_bay';
+  } else if (pin === TEST_PIN) {
+    currentRole = 'test';
+    currentClubId = 'test_account';
   } else {
     const err = document.getElementById('authError');
     err.textContent = 'Incorrect PIN — contact your supervisor';
@@ -981,6 +996,11 @@ function onAuthSuccess() {
     ri.style.background = 'rgba(224,64,251,0.15)';
     ri.style.color = 'var(--pink)';
     ri.style.border = '1px solid var(--pink)';
+  } else if (currentRole === 'test') {
+    ri.textContent = '⚙ TEST ACCOUNT';
+    ri.style.background = 'rgba(255,180,0,0.15)';
+    ri.style.color = '#ffb400';
+    ri.style.border = '1px solid #ffb400';
   } else {
     ri.textContent = '● COACH';
     ri.style.background = 'rgba(64,196,255,0.15)';
@@ -988,9 +1008,10 @@ function onAuthSuccess() {
     ri.style.border = '1px solid var(--sky)';
   }
   ri.style.display = 'inline-block';
-  document.getElementById('coachesBtn').style.display = 'block';
+  // Only show coaches button for RB accounts
+  document.getElementById('coachesBtn').style.display = currentRole === 'admin' ? 'block' : 'none';
   renderSavedSessions();
-  renderSharedSessions();
+  if (currentRole !== 'test') renderSharedSessions();
 }
 
 // ============================================================
@@ -998,19 +1019,20 @@ function onAuthSuccess() {
 // ============================================================
 const SUPABASE_URL = 'https://mfrwmyjbuhjpnrrtheff.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_FnqZR1rVvGirH9H7YhsHTw_Xc5Hs1f_';
-const CLUB_ID = 'runaway_bay';
 
 const sb = {
-  headers: {
-    'Content-Type': 'application/json',
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Prefer': 'return=representation'
+  get headers() {
+    return {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Prefer': 'return=representation'
+    };
   },
 
   async getSessions(publishedOnly = false) {
     try {
-      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?club_id=eq.${CLUB_ID}&order=created_at.desc`;
+      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?club_id=eq.${currentClubId}&order=session_data->>sessionDate.asc,created_at.desc`;
       if (publishedOnly) url += '&published=eq.true';
       const r = await fetch(url, { headers: this.headers });
       return await r.json();
@@ -1023,7 +1045,7 @@ const sb = {
         method: 'POST',
         headers: this.headers,
         body: JSON.stringify({
-          club_id: CLUB_ID,
+          club_id: currentClubId,
           session_data: sessionData,
           published,
           created_by: currentRole
@@ -1045,9 +1067,19 @@ const sb = {
     } catch(e) { console.error('publishSession:', e); return false; }
   },
 
+  async deleteSession(id) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: this.headers
+      });
+      return true;
+    } catch(e) { console.error('deleteSession:', e); return false; }
+  },
+
   async getCoaches() {
     try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches?club_id=eq.${CLUB_ID}&order=created_at.asc`, { headers: this.headers });
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches?club_id=eq.${currentClubId}&order=created_at.asc`, { headers: this.headers });
       return await r.json();
     } catch(e) { console.error('getCoaches:', e); return []; }
   },
@@ -1057,7 +1089,7 @@ const sb = {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches`, {
         method: 'POST',
         headers: this.headers,
-        body: JSON.stringify({ club_id: CLUB_ID, name, role })
+        body: JSON.stringify({ club_id: currentClubId, name, role })
       });
       return await r.json();
     } catch(e) { console.error('insertCoach:', e); return null; }
@@ -1694,10 +1726,51 @@ async function publishExistingSession(supabaseId, btnEl) {
 // In-memory session caches to avoid JSON-in-onclick issues
 let cachedSavedSessions = [];
 let cachedSharedSessions = [];
+let archiveOpen = false;
+
+function toggleArchive() {
+  archiveOpen = !archiveOpen;
+  document.getElementById('archiveSessionsList').style.display = archiveOpen ? 'block' : 'none';
+  document.getElementById('archiveChevron').textContent = archiveOpen ? '▼' : '▶';
+}
+
+function isUpcoming(row) {
+  const s = row.session_data || row;
+  if (!s.sessionDate) return true;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const sessionDate = new Date(s.sessionDate + 'T00:00:00');
+  return sessionDate >= today;
+}
+
+function buildSessionCard(row, idx, isShared, isArchived) {
+  const s = row.session_data || row;
+  const isPublished = row.published;
+  const canDelete = (currentRole === 'admin' || currentRole === 'test') && row.id;
+  const canShare = currentRole === 'admin' && row.id && !isPublished && !isShared;
+  const canTemplate = isArchived || isShared;
+  const borderColor = isShared ? 'border-color:var(--purple);' : '';
+
+  return `
+  <div class="saved-session-card" style="${borderColor}" onclick="loadSavedSession(${idx}, ${isShared})">
+    <div style="flex:1;min-width:0;">
+      <div class="saved-session-name">${s.name || 'Untitled Session'}</div>
+      <div class="saved-session-meta">${(s.blocks||[]).length} block${(s.blocks||[]).length!==1?'s':''}${s.game?' · 🎮 '+s.game.name:''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+      ${canShare ? `<button class="btn btn-sky" style="padding:5px 8px;font-size:10px;" onclick="event.stopPropagation();publishExistingSession('${row.id}',this)">SHARE</button>` : ''}
+      ${isPublished && !isShared ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--purple);letter-spacing:1px;">SHARED</span>` : ''}
+      ${canTemplate ? `<button class="btn" style="padding:5px 8px;font-size:10px;color:var(--sky);border-color:var(--sky);" onclick="event.stopPropagation();useAsTemplate(${idx},${isShared})">USE</button>` : ''}
+      ${canDelete ? `<button class="btn" style="padding:5px 8px;font-size:10px;color:#ff5555;border-color:#ff5555;" onclick="event.stopPropagation();deleteSession('${row.id}',this)">✕</button>` : ''}
+      <div style="color:${isShared?'var(--purple)':'var(--silver)'};font-size:18px;">›</div>
+    </div>
+  </div>`;
+}
 
 async function renderSavedSessions() {
-  const el = document.getElementById('savedSessionsList');
-  el.innerHTML = `<div class="empty-state">Loading...</div>`;
+  const upcomingEl = document.getElementById('upcomingSessionsList');
+  const archiveEl = document.getElementById('archiveSessionsList');
+  if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">Loading...</div>`;
 
   let sessions = await sb.getSessions(false);
   if (currentRole === 'coach') {
@@ -1705,72 +1778,68 @@ async function renderSavedSessions() {
   }
 
   if (!sessions || sessions.length === 0) {
-    const local = loadFromStorage('sc_sessions') || [];
-    if (local.length === 0) {
-      el.innerHTML = `<div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>`;
-      return;
-    }
-    cachedSavedSessions = local.map(s => ({ session_data: s, id: null, published: false }));
-  } else {
-    cachedSavedSessions = sessions;
+    if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
+    if (archiveEl) archiveEl.innerHTML = `<div class="empty-state">No archived sessions yet.</div>`;
+    cachedSavedSessions = [];
+    return;
   }
 
-  el.innerHTML = cachedSavedSessions.map((row, i) => {
-    const s = row.session_data || row;
-    const isPublished = row.published;
-    return `
-    <div class="saved-session-card" onclick="loadSavedSession(${i})">
-      <div>
-        <div class="saved-session-name">${s.name || 'Untitled Session'}</div>
-        <div class="saved-session-meta">${s.blocks ? s.blocks.length : 0} block${(s.blocks||[]).length !== 1 ? 's' : ''}${s.game ? ' · 🎮 '+s.game.name : ''} · ${s.savedAt ? new Date(s.savedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        ${currentRole === 'admin' && row.id && !isPublished
-          ? `<button class="btn btn-sky" style="padding:5px 9px;font-size:10px;" onclick="event.stopPropagation();publishExistingSession('${row.id}',this)">SHARE</button>`
-          : isPublished ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--purple);letter-spacing:1px;">SHARED</span>` : ''}
-        <div style="color:var(--silver);font-size:18px;">›</div>
-      </div>
-    </div>`;
-  }).join('');
+  cachedSavedSessions = sessions;
+  const upcoming = sessions.filter(r => isUpcoming(r));
+  const archived = sessions.filter(r => !isUpcoming(r));
+
+  if (upcomingEl) upcomingEl.innerHTML = upcoming.length
+    ? upcoming.map(row => buildSessionCard(row, sessions.indexOf(row), false, false)).join('')
+    : `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
+
+  if (archiveEl) archiveEl.innerHTML = archived.length
+    ? archived.map(row => buildSessionCard(row, sessions.indexOf(row), false, true)).join('')
+    : `<div class="empty-state">No archived sessions yet.</div>`;
 }
 
 async function renderSharedSessions() {
   const section = document.getElementById('sharedSessionsSection');
   const el = document.getElementById('sharedSessionsList');
+  if (!section || !el) return;
 
   const published = await sb.getSessions(true);
-
-  if (!published || published.length === 0) {
-    section.style.display = 'none';
-    return;
-  }
+  if (!published || published.length === 0) { section.style.display = 'none'; return; }
 
   cachedSharedSessions = published;
   section.style.display = 'block';
-  el.innerHTML = cachedSharedSessions.map((row, i) => {
-    const s = row.session_data;
-    return `
-    <div class="saved-session-card" style="border-color:var(--purple);" onclick="loadSharedSession(${i})">
-      <div>
-        <div class="saved-session-name">${s.name || 'Session'}</div>
-        <div class="saved-session-meta">${(s.blocks||[]).length} block${(s.blocks||[]).length !== 1 ? 's' : ''}${s.game ? ' · 🎮 '+s.game.name : ''} · ${row.created_at ? new Date(row.created_at).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
-      </div>
-      <div style="color:var(--purple);font-size:18px;">›</div>
-    </div>`;
-  }).join('');
+  el.innerHTML = cachedSharedSessions.map((row, i) => buildSessionCard(row, i, true, true)).join('');
 }
 
-function loadSavedSession(idx) {
-  const row = cachedSavedSessions[idx];
+async function deleteSession(id, btnEl) {
+  if (!confirm('Delete this session? This cannot be undone.')) return;
+  btnEl.textContent = '...';
+  btnEl.disabled = true;
+  await sb.deleteSession(id);
+  await renderSavedSessions();
+  await renderSharedSessions();
+}
+
+function useAsTemplate(idx, isShared) {
+  const row = isShared ? cachedSharedSessions[idx] : cachedSavedSessions[idx];
   if (!row) return;
-  session = JSON.parse(JSON.stringify(row.session_data || row));
-  previewMode = 'view';
-  renderPreview();
-  showScreen('preview');
+  const s = JSON.parse(JSON.stringify(row.session_data || row));
+  session = {
+    warmup: s.warmup !== undefined ? s.warmup : null,
+    blocks: s.blocks || [],
+    game: s.game || null,
+    name: '',
+    savedAt: null,
+    sessionDate: null
+  };
+  renderWarmupList();
+  renderAddedBlocks();
+  renderGamesList();
+  previewMode = 'build';
+  showScreen('warmup');
 }
 
-function loadSharedSession(idx) {
-  const row = cachedSharedSessions[idx];
+function loadSavedSession(idx, isShared = false) {
+  const row = isShared ? cachedSharedSessions[idx] : cachedSavedSessions[idx];
   if (!row) return;
   session = JSON.parse(JSON.stringify(row.session_data || row));
   previewMode = 'view';
@@ -1835,10 +1904,9 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   window.scrollTo(0,0);
-  // Re-render home screen lists when returning to home
   if (id === 'home' && currentRole) {
     renderSavedSessions();
-    renderSharedSessions();
+    if (currentRole !== 'test') renderSharedSessions();
   }
 }
 
