@@ -640,6 +640,21 @@ body {
 .border-breast { border-left: 3px solid var(--stroke-breast); }
 .border-fly { border-left: 3px solid var(--stroke-fly); }
 
+.top-back-btn {
+  background: none;
+  border: none;
+  color: var(--silver);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 0 0 12px 0;
+  cursor: pointer;
+  display: block;
+}
+.top-back-btn:hover { color: var(--white); }
+
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 
 .empty-state {
@@ -694,6 +709,7 @@ body {
 
 <!-- BUILD: WARMUP SCREEN -->
 <div class="screen" id="screen-warmup">
+  <button class="top-back-btn" onclick="showScreen('home')">← HOME</button>
   <div class="step-bar">
     <div class="step-dot active" id="step1"></div>
     <div class="step-dot" id="step2"></div>
@@ -714,6 +730,7 @@ body {
 
 <!-- BUILD: STROKE SELECTOR SCREEN -->
 <div class="screen" id="screen-strokes">
+  <button class="top-back-btn" onclick="showScreen('warmup')">← WARM UP</button>
   <div class="step-bar">
     <div class="step-dot done" id="s-step1"></div>
     <div class="step-dot active" id="s-step2"></div>
@@ -754,6 +771,7 @@ body {
 
 <!-- BUILD: DRILL PICKER SCREEN -->
 <div class="screen" id="screen-drills">
+  <button class="top-back-btn" onclick="showScreen('strokes')">← STROKES</button>
   <div class="section-title" id="drillPickerTitle">FREESTYLE DRILLS</div>
   <div class="section-sub" id="drillPickerSub">Select drills for this block</div>
 
@@ -781,6 +799,7 @@ body {
 
 <!-- BUILD: GAMES / FINISHER SCREEN -->
 <div class="screen" id="screen-games">
+  <button class="top-back-btn" onclick="showScreen('strokes')">← STROKES</button>
   <div class="step-bar">
     <div class="step-dot done"></div>
     <div class="step-dot done"></div>
@@ -807,6 +826,7 @@ body {
 
 <!-- SESSION PREVIEW / CARD SCREEN -->
 <div class="screen" id="screen-preview">
+  <button class="top-back-btn" id="previewTopBack" onclick="handlePreviewBack()">← BACK</button>
   <div class="session-card-header">
     <div class="session-card-title">SESSION CARD</div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;" id="previewDate"></div>
@@ -1455,6 +1475,14 @@ function showDrillInfo(stroke, drillName) {
 // ============================================================
 // PREVIEW
 // ============================================================
+function handlePreviewBack() {
+  if (previewMode === 'build') {
+    showScreen('games');
+  } else {
+    showScreen('home');
+  }
+}
+
 // 'build' = coming from build flow, 'view' = viewing saved/shared session
 let previewMode = 'build';
 
@@ -1472,6 +1500,14 @@ function renderPreview() {
   const wu = WARMUP_OPTIONS[session.warmup];
   const now = new Date();
   document.getElementById('previewDate').textContent = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+
+  // Set top back button label
+  const topBack = document.getElementById('previewTopBack');
+  if (previewMode === 'build') {
+    topBack.textContent = '← GAMES';
+  } else {
+    topBack.textContent = '← HOME';
+  }
 
   // Set action buttons based on mode
   const actions = document.getElementById('previewActions');
