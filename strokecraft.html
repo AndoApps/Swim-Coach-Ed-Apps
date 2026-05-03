@@ -814,7 +814,7 @@ body {
   <div id="previewContent"></div>
   <div style="display:flex;gap:8px;margin-top:6px;">
     <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('games')">← EDIT</button>
-    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="saveSession()">SAVE SESSION ✓</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="openSaveModal()">SAVE SESSION ✓</button>
   </div>
 </div>
 
@@ -901,13 +901,17 @@ body {
   </div>
 </div>
 
-<!-- SHARE SESSION MODAL -->
-<div class="modal-overlay" id="shareModal">
+<!-- SESSION DATE MODAL -->
+<div class="modal-overlay" id="sessionDateModal">
   <div class="modal">
-    <div class="modal-title">SHARE SESSION</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:16px;">PUBLISH TO CLUB COACHES</div>
-    <div id="shareContent"></div>
-    <button class="modal-close" onclick="closeModal('shareModal')">CLOSE</button>
+    <div class="modal-title">NAME THIS SESSION</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:16px;">PICK THE DATE IT WILL BE RUN</div>
+    <input type="date" id="sessionDateInput"
+      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:18px;letter-spacing:1px;padding:14px;border-radius:10px;margin-bottom:16px;outline:none;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:6px;">PREVIEW</div>
+    <div id="sessionDatePreview" style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--white);margin-bottom:20px;"></div>
+    <button class="btn btn-pink btn-full" onclick="confirmSaveSession()">SAVE SESSION ✓</button>
+    <button class="btn btn-full" style="margin-top:8px;" onclick="closeModal('sessionDateModal')">CANCEL</button>
   </div>
 </div>
 
@@ -1511,52 +1515,62 @@ function renderPreview() {
 // ============================================================
 // SAVE / LOAD SESSIONS
 // ============================================================
-async function saveSession() {
-  const btn = event.target;
-  const orig = btn.textContent;
-  btn.textContent = 'SAVING...';
-  btn.disabled = true;
+function openSaveModal() {
+  // Default date picker to today
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  const input = document.getElementById('sessionDateInput');
+  input.value = `${yyyy}-${mm}-${dd}`;
+  updateDatePreview();
+  input.addEventListener('input', updateDatePreview);
+  document.getElementById('sessionDateModal').classList.add('active');
+}
 
-  const name = `${session.blocks.map(b => STROKE_LABELS[b.stroke].substring(0,2)).join('+')} Session`;
+function updateDatePreview() {
+  const val = document.getElementById('sessionDateInput').value;
+  if (!val) { document.getElementById('sessionDatePreview').textContent = '—'; return; }
+  const d = new Date(val + 'T00:00:00');
+  const name = d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+  // Format: "Thu 8 May"
+  const parts = name.split(' ');
+  document.getElementById('sessionDatePreview').textContent = name;
+}
+
+function formatSessionName(dateVal) {
+  if (!dateVal) return 'Session';
+  const d = new Date(dateVal + 'T00:00:00');
+  return d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+}
+
+async function confirmSaveSession() {
+  const dateVal = document.getElementById('sessionDateInput').value;
+  closeModal('sessionDateModal');
+
+  const name = formatSessionName(dateVal);
   session.name = name;
   session.savedAt = new Date().toISOString();
+  session.sessionDate = dateVal;
   session.savedBy = currentRole;
 
-  // Always save to localStorage as backup
+  // Save to localStorage as backup
   const localSaved = loadFromStorage('sc_sessions') || [];
   localSaved.unshift(JSON.parse(JSON.stringify(session)));
   saveToStorage('sc_sessions', localSaved);
 
   // Save to Supabase
   const result = await sb.insertSession(session, false);
-
-  btn.textContent = 'SAVED ✓';
-  btn.style.background = '#1a3a1a';
+  renderSavedSessions();
 
   if (currentRole === 'admin' && result) {
-    setTimeout(() => {
-      btn.textContent = orig;
-      btn.style.background = '';
-      btn.disabled = false;
-      if (confirm('Publish this session to your coaches?')) {
-        sb.publishSession(result.id).then(() => {
-          renderSharedSessions();
-          alert('Session published! Your coaches can now see it.');
-          showScreen('home');
-        });
-      } else {
-        showScreen('home');
-      }
-    }, 1000);
-  } else {
-    setTimeout(() => {
-      btn.textContent = orig;
-      btn.style.background = '';
-      btn.disabled = false;
-      showScreen('home');
-    }, 1500);
+    if (confirm(`Publish "${name}" to your coaches now?`)) {
+      await sb.publishSession(result.id);
+      await renderSharedSessions();
+      alert(`"${name}" is now live for your coaches.`);
+    }
   }
-  renderSavedSessions();
+  showScreen('home');
 }
 
 async function publishExistingSession(supabaseId, btnEl) {
