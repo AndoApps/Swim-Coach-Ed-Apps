@@ -1069,9 +1069,14 @@ const sb = {
 
   async deleteSession(id) {
     try {
+      const deleteHeaders = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      };
       await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions?id=eq.${id}`, {
         method: 'DELETE',
-        headers: this.headers
+        headers: deleteHeaders
       });
       return true;
     } catch(e) { console.error('deleteSession:', e); return false; }
@@ -1531,7 +1536,15 @@ function goToPreview() {
 function renderPreview() {
   const wu = WARMUP_OPTIONS[session.warmup];
   const now = new Date();
-  document.getElementById('previewDate').textContent = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+  // Show session date if set, otherwise today
+  let displayDate;
+  if (session.sessionDate) {
+    const sd = new Date(session.sessionDate + 'T00:00:00');
+    displayDate = sd.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+  } else {
+    displayDate = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+  }
+  document.getElementById('previewDate').textContent = displayDate;
 
   // Set top back button label
   const topBack = document.getElementById('previewTopBack');
@@ -1746,7 +1759,8 @@ function isUpcoming(row) {
 function buildSessionCard(row, idx, isShared, isArchived) {
   const s = row.session_data || row;
   const isPublished = row.published;
-  const canDelete = (currentRole === 'admin' || currentRole === 'test') && row.id;
+  const isOwned = currentRole === 'admin' || currentRole === 'test' || (currentRole === 'coach' && !isShared);
+  const canDelete = isOwned && row.id;
   const canShare = currentRole === 'admin' && row.id && !isPublished && !isShared;
   const canTemplate = isArchived || isShared;
   const borderColor = isShared ? 'border-color:var(--purple);' : '';
