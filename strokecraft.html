@@ -662,10 +662,13 @@ body {
     <div class="logo-icon">🏊</div>
     <div>
       <div class="logo-text">STROKECRAFT</div>
-      <div class="logo-v">V1.1 — JUNIOR SQUAD</div>
+      <div class="logo-v">V1.2 — JUNIOR SQUAD</div>
     </div>
   </div>
-  <div id="headerDate" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;"></div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div id="headerDate" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;"></div>
+    <button class="btn" style="padding:6px 10px;font-size:11px;" onclick="openCoachesModal()" id="coachesBtn" style="display:none;">👥</button>
+  </div>
 </div>
 
 <!-- HOME SCREEN -->
@@ -673,11 +676,17 @@ body {
   <div class="home-hero">
     <div class="home-title">STROKECRAFT</div>
     <div class="home-sub">Junior Squad Session Builder</div>
+    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:8px;"></div>
   </div>
 
   <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
 
-  <div class="home-sessions-title">SAVED SESSIONS</div>
+  <div id="sharedSessionsSection" style="display:none;">
+    <div class="home-sessions-title">📢 SHARED BY SUPERVISOR</div>
+    <div id="sharedSessionsList"></div>
+  </div>
+
+  <div class="home-sessions-title">MY SESSIONS</div>
   <div id="savedSessionsList">
     <div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>
   </div>
@@ -689,6 +698,7 @@ body {
     <div class="step-dot active" id="step1"></div>
     <div class="step-dot" id="step2"></div>
     <div class="step-dot" id="step3"></div>
+    <div class="step-dot" id="step4"></div>
   </div>
   <div class="section-title">WARM UP</div>
   <div class="section-sub">Choose a warm-up option</div>
@@ -708,6 +718,7 @@ body {
     <div class="step-dot done" id="s-step1"></div>
     <div class="step-dot active" id="s-step2"></div>
     <div class="step-dot" id="s-step3"></div>
+    <div class="step-dot" id="s-step4"></div>
   </div>
   <div class="section-title">STROKE BLOCKS</div>
   <div class="section-sub">Add 1–4 stroke blocks to your session</div>
@@ -737,7 +748,7 @@ body {
   <div class="divider"></div>
   <div style="display:flex;gap:8px;">
     <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('warmup')">← BACK</button>
-    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="goToPreview()">PREVIEW SESSION →</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="showScreen('games');renderGamesList()">NEXT: GAMES →</button>
   </div>
 </div>
 
@@ -768,6 +779,32 @@ body {
   </div>
 </div>
 
+<!-- BUILD: GAMES / FINISHER SCREEN -->
+<div class="screen" id="screen-games">
+  <div class="step-bar">
+    <div class="step-dot done"></div>
+    <div class="step-dot done"></div>
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="section-title">FINISHER GAME</div>
+  <div class="section-sub">Optional — add a fun game to end the session</div>
+
+  <div class="cat-tabs" style="margin-bottom:14px;">
+    <div class="cat-tab active-found" id="gtab-relay" onclick="showGameCat('relay',this)">RELAY</div>
+    <div class="cat-tab" id="gtab-skill" onclick="showGameCat('skill',this)">SKILL</div>
+    <div class="cat-tab" id="gtab-team" onclick="showGameCat('team',this)">TEAM</div>
+  </div>
+
+  <div id="gamesList"></div>
+
+  <div class="divider"></div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('strokes')">← BACK</button>
+    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="goToPreview()">PREVIEW →</button>
+  </div>
+</div>
+
 <!-- SESSION PREVIEW / CARD SCREEN -->
 <div class="screen" id="screen-preview">
   <div class="session-card-header">
@@ -776,7 +813,7 @@ body {
   </div>
   <div id="previewContent"></div>
   <div style="display:flex;gap:8px;margin-top:6px;">
-    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('strokes')">← EDIT</button>
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('games')">← EDIT</button>
     <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="saveSession()">SAVE SESSION ✓</button>
   </div>
 </div>
@@ -794,19 +831,221 @@ body {
   </div>
 </div>
 
+<!-- WARMUP INFO MODAL -->
+<div class="modal-overlay" id="warmupInfoModal">
+  <div class="modal">
+    <div class="modal-title" id="modalWarmupName"></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--sky);margin-bottom:10px;" id="modalWarmupDist"></div>
+    <div class="modal-desc" id="modalWarmupDesc"></div>
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:16px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--pink);margin-bottom:8px;">COACHING CUES</div>
+      <div id="modalWarmupCues" style="font-size:13px;color:var(--silver2);line-height:1.8;"></div>
+    </div>
+    <button class="modal-close" onclick="closeModal('warmupInfoModal')">CLOSE</button>
+  </div>
+</div>
+
+<!-- GAME INFO MODAL -->
+<div class="modal-overlay" id="gameInfoModal">
+  <div class="modal">
+    <div class="modal-title" id="modalGameName"></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--sky);margin-bottom:10px;" id="modalGameType"></div>
+    <div class="modal-desc" id="modalGameDesc"></div>
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:8px;padding:12px;margin-bottom:16px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--pink);margin-bottom:8px;">HOW TO RUN IT</div>
+      <div id="modalGameHow" style="font-size:13px;color:var(--silver2);line-height:1.8;"></div>
+    </div>
+    <button class="modal-close" onclick="closeModal('gameInfoModal')">CLOSE</button>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay active" id="authModal">
+  <div class="modal" style="margin-top:60px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;background:linear-gradient(90deg,var(--pink),var(--purple),var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">STROKECRAFT</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--silver);text-transform:uppercase;margin-top:4px;">Junior Squad Session Builder</div>
+    </div>
+    <div id="authError" style="display:none;background:#3a1a1a;border:1px solid #ff5555;border-radius:8px;padding:10px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#ff5555;letter-spacing:1px;text-align:center;"></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:8px;">ENTER YOUR CLUB PIN</div>
+    <input type="password" id="authPinInput" placeholder="• • • •" maxlength="4"
+      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:8px;text-align:center;padding:14px;border-radius:10px;margin-bottom:12px;outline:none;"
+      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+      onkeydown="if(event.key==='Enter')submitAuth()">
+    <button class="btn btn-pink btn-full" onclick="submitAuth()">ENTER →</button>
+    <div style="text-align:center;margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;">Contact your supervisor for your club PIN</div>
+  </div>
+</div>
+
+<!-- COACHES MODAL -->
+<div class="modal-overlay" id="coachesModal">
+  <div class="modal">
+    <div class="modal-title">COACH ACCOUNTS</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:16px;">RUNAWAY BAY SQUAD</div>
+    <div id="coachesList" style="margin-bottom:16px;"></div>
+    <div id="addCoachForm" style="display:none;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:14px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:10px;">ADD COACH</div>
+      <input id="newCoachName" placeholder="Coach name" maxlength="30"
+        style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:10px;border-radius:8px;margin-bottom:8px;outline:none;">
+      <input id="newCoachRole" placeholder="Role (e.g. Junior Coach)" maxlength="30"
+        style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:10px;border-radius:8px;margin-bottom:10px;outline:none;">
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="flex:1;" onclick="document.getElementById('addCoachForm').style.display='none'">CANCEL</button>
+        <button class="btn btn-pink" style="flex:2;" onclick="saveNewCoach()">ADD COACH</button>
+      </div>
+    </div>
+    <div id="adminCoachControls" style="display:none;">
+      <button class="btn btn-sky btn-full" style="margin-bottom:8px;" onclick="document.getElementById('addCoachForm').style.display='block'">+ ADD COACH</button>
+    </div>
+    <button class="modal-close" onclick="closeModal('coachesModal')">CLOSE</button>
+  </div>
+</div>
+
+<!-- SHARE SESSION MODAL -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <div class="modal-title">SHARE SESSION</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:16px;">PUBLISH TO CLUB COACHES</div>
+    <div id="shareContent"></div>
+    <button class="modal-close" onclick="closeModal('shareModal')">CLOSE</button>
+  </div>
+</div>
+
+
 <script>
+// ============================================================
+// AUTH
+// ============================================================
+const ADMIN_PIN = '0000';
+const CLUB_PIN  = '0001';
+let currentRole = null; // 'admin' | 'coach'
+
+function submitAuth() {
+  const pin = document.getElementById('authPinInput').value.trim();
+  if (pin === ADMIN_PIN) {
+    currentRole = 'admin';
+  } else if (pin === CLUB_PIN) {
+    currentRole = 'coach';
+  } else {
+    const err = document.getElementById('authError');
+    err.textContent = 'Incorrect PIN — contact your supervisor';
+    err.style.display = 'block';
+    document.getElementById('authPinInput').value = '';
+    return;
+  }
+  closeModal('authModal');
+  onAuthSuccess();
+}
+
+function onAuthSuccess() {
+  const ri = document.getElementById('roleIndicator');
+  if (currentRole === 'admin') {
+    ri.textContent = '★ SUPERVISOR';
+    ri.style.background = 'rgba(224,64,251,0.15)';
+    ri.style.color = 'var(--pink)';
+    ri.style.border = '1px solid var(--pink)';
+  } else {
+    ri.textContent = '● COACH';
+    ri.style.background = 'rgba(64,196,255,0.15)';
+    ri.style.color = 'var(--sky)';
+    ri.style.border = '1px solid var(--sky)';
+  }
+  ri.style.display = 'inline-block';
+  document.getElementById('coachesBtn').style.display = 'block';
+  renderSavedSessions();
+  renderSharedSessions();
+}
+
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
+const SUPABASE_URL = 'https://mfrwmyjbuhjpnrrtheff.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mcndteWpidWhqcG5ycnRoZWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MzE4NDYsImV4cCI6MjA5MDAwNzg0Nn0.PAuJvSaCbKpCUNklEPjwxA5gREdBpCKGoEjzJEmsCdU';
+const CLUB_ID = 'runaway_bay';
+
+const sb = {
+  headers: {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Prefer': 'return=representation'
+  },
+
+  async getSessions(publishedOnly = false) {
+    try {
+      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?club_id=eq.${CLUB_ID}&order=created_at.desc`;
+      if (publishedOnly) url += '&published=eq.true';
+      const r = await fetch(url, { headers: this.headers });
+      return await r.json();
+    } catch(e) { console.error('getSessions:', e); return []; }
+  },
+
+  async insertSession(sessionData, published = false) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({
+          club_id: CLUB_ID,
+          session_data: sessionData,
+          published,
+          created_by: currentRole
+        })
+      });
+      const result = await r.json();
+      return result[0] || null;
+    } catch(e) { console.error('insertSession:', e); return null; }
+  },
+
+  async publishSession(id) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: this.headers,
+        body: JSON.stringify({ published: true })
+      });
+      return true;
+    } catch(e) { console.error('publishSession:', e); return false; }
+  },
+
+  async getCoaches() {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches?club_id=eq.${CLUB_ID}&order=created_at.asc`, { headers: this.headers });
+      return await r.json();
+    } catch(e) { console.error('getCoaches:', e); return []; }
+  },
+
+  async insertCoach(name, role) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ club_id: CLUB_ID, name, role })
+      });
+      return await r.json();
+    } catch(e) { console.error('insertCoach:', e); return null; }
+  },
+
+  async deleteCoach(id) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: this.headers
+      });
+      return true;
+    } catch(e) { console.error('deleteCoach:', e); return false; }
+  }
+};
+
 // ============================================================
 // DRILL LIBRARY
 // ============================================================
 const DRILLS = {
   free: [
-    // FOUNDATIONAL
     { name:'Kick on Board', cue:'Kick on front holding board. Feet below surface, small kicks.', desc:'Hold a kickboard extended in front. Keep feet below the surface, use small fast kicks from the hip. Head down, eyes looking at the bottom. Chin resting on the water surface to breathe.', cat:'foundational' },
     { name:'L Drill', cue:'One arm front on aid, other points to sky. Kick, eyes down, flat head to breathe.', desc:'One arm rests on a board or pull buoy extended in front. The other arm points straight up to the sky. Kick face down with eyes looking at the pool floor. Head stays flat on the water — chin just above the surface to breathe. Focuses on body position and balance.', cat:'foundational' },
     { name:'Side Kick', cue:'Kick on side, bottom arm extended, top arm on hip. Balance and rotation.', desc:'Roll to your side and kick. Bottom arm is extended forward underwater, top arm rests on your hip. Keep hips stacked, body flat like a plank. Take 6–10 kicks then rotate to the other side. Develops balance and body rotation awareness.', cat:'foundational' },
     { name:'Long Dog', cue:'Freestyle arms with underwater recovery, kick from the hip — no bent knees. High elbow to engage forearm.', desc:'Perform freestyle arm strokes but recover the arm underwater — drive the hand forward under the surface to a long extension out in front, not over the top. Kick from the hip with straight legs, no knee bend. Key focus: keep the elbow HIGH throughout the pull, so the forearm engages the water and acts as a paddle. A dropped elbow means the forearm is wasted. Teaches front-quadrant swimming, forearm engagement, and a relaxed efficient pull.', cat:'foundational' },
-
-    // TECHNICAL
     { name:'Zipper Drill', cue:'One arm extended on aid. Zip thumb up armpit, head down eyes on bottom, zip back down. Repeat.', desc:'Start with one arm extended on a board or pull buoy in front. Head is down, eyes looking at the pool floor. Zip the recovering thumb up the side of your body from hip to armpit — elbow stays high. After reaching the armpit, return the head down with eyes on the bottom, then zip the hand back down and re-extend forward. Repeat each cycle without moving to the L Drill position. Builds high elbow recovery and early vertical forearm.', cat:'technical' },
     { name:'Scooter Drill', cue:'Single arm free, hand scoots under the buoy before catching and pulling.', desc:'Similar to single arm freestyle, but the recovering hand slides under the pull buoy (or body) before catching the water and pulling through. Forces the swimmer to reach and catch wide before pulling. Great for developing a wide, powerful catch position.', cat:'technical' },
     { name:'Fists', cue:'Swim freestyle with clenched fists. Feel the forearm catching water.', desc:'Swim normal freestyle but with hands clenched in fists. This removes the hand from the equation and forces the swimmer to feel the forearm and upper arm pressing against the water. When you open the hand after a length, the improved catch sensation is immediate.', cat:'technical' },
@@ -814,156 +1053,127 @@ const DRILLS = {
     { name:'Single Arm (arm by side)', cue:'One arm strokes, other at hip. Breathe to NON-stroking side when stroking arm is fully extended.', desc:'One arm performs a full freestyle stroke while the other rests at the hip. Breathe to the non-stroking arm side — the opposite side to the pulling arm — when the stroking arm is fully extended in front. Breathing to the non-stroking side promotes buoyancy when breathing and teaches a balanced body position. Focus on a deep entry and pulling through to full extension.', cat:'technical' },
     { name:'Single Arm (arm in front)', cue:'One arm strokes, other extended front. Recovering arm extends beyond the lead hand before pulling.', desc:'One arm strokes while the other stays extended forward underwater. The recovering arm must return to the front and extend beyond the lead hand before catching and pulling. This exaggerates the reach and front-quadrant overlap. Focuses on entry, reach, and the timing of the catch. More stable than the arm-by-side version.', cat:'technical' },
     { name:'Catch-up', cue:'Wait for hands to touch before next stroke. Exaggerates timing and glide.', desc:'Swim freestyle but the recovering arm must wait at the front — fully extended — until the other hand catches up and touches it. Then that arm pulls while the first one waits. Exaggerates the glide phase and improves stroke timing. Slows the stroke rate down intentionally.', cat:'technical' },
-    { name:'Ice Skater', cue:'Like catch-up, focus on arm glide after entry. Time the pull with the glide.', desc:'Similar to catch-up but the focus is on the glide of the lead arm after entry — feel it slide forward before initiating the pull. The pull timing should correspond with the end of the glide, not start immediately. Named after the long glide between pushes of an ice skater. Develops front-quadrant timing.', cat:'technical' },
     { name:'6-Kick Switch', cue:'6 freestyle flutter kicks on side, rotate and take a stroke. Balance and rotation.', desc:'Balance on your side with the bottom arm extended forward and take 6 freestyle flutter kicks — not dolphin kicks. Then rotate to the other side with a single arm stroke and repeat. Focuses on body rotation, balance on the side, and the connection between rotation and the pull. Keep the head still and hips up throughout the kick phase.', cat:'technical' },
     { name:'Shark Fin', cue:'Pause elbow high at surface during recovery. Entry from high position.', desc:'During the freestyle recovery, pause when the elbow reaches the highest point — it should look like a shark fin sticking out of the water. Hold for a moment, then drive the hand forward and enter. Promotes high elbow recovery and prevents dropped elbow entry.', cat:'technical' },
-    { name:'3 Point Touch', cue:'Hip → sky → shoulder → sky → head → extend forward. Other arm pulls through.', desc:'During the freestyle recovery, the hand touches three checkpoints in sequence: touch the hip, extend to the sky, touch the shoulder, extend to the sky again, touch the head, then extend out in front — at which point the other arm pulls through. Choreographs the recovery path deliberately. Excellent for swimmers with a wide swinging arm recovery. Slows down the movement to ingrain the correct high-elbow path.', cat:'technical' },
-
-    // APPLICATION
     { name:'Polo (Head-up)', cue:'Head up and forward the whole length. Forces strong pull to stay up.', desc:'Swim freestyle with the head held up looking forward — like a water polo player. To keep the head up, the pull must be powerful and the hips must be strong. The head going up forces the hips down — swimmers must fight this. Great for developing catch and pull strength.', cat:'application' },
-    { name:'Straight Arm', cue:'High straight arm recovery — swing arm high over the water. Feel the increased rotation.', desc:'Swim freestyle with a straight arm recovery — swing the arm high over the water in a wide arc rather than the usual bent elbow recovery. This increases the body rotation requirement significantly. Useful for swimmers who need to feel more rotation, or as a contrast drill before returning to normal technique. The arm stays straight and swings up and over, not low like a windmill.', cat:'application' },
+    { name:'Straight Arm', cue:'High straight arm recovery — swing arm high over the water. Feel the increased rotation.', desc:'Swim freestyle with a straight arm recovery — swing the arm high over the water in a wide arc rather than the usual bent elbow recovery. This increases the body rotation requirement significantly. Useful for swimmers who need to feel more rotation, or as a contrast drill before returning to normal technique.', cat:'application' },
     { name:'7-3-7', cue:'7 kicks on side, 3 strokes, 7 kicks other side. Rhythm and balance.', desc:'Balance on your side and kick for 7 kicks, then take 3 freestyle strokes and arrive on the other side, kick for 7 more kicks, then 3 strokes back. Develops body rotation awareness, balance, and the connection between side-lying position and the freestyle stroke rhythm.', cat:'application' },
-    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
-    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Technique must be sustained over a full length and turn.', cat:'application' },
   ],
-
   back: [
-    // FOUNDATIONAL
-    { name:'Kick on Back', cue:'Streamline on back, palms pressed together. Forces body position and core engagement.', desc:'Float on your back with arms extended in streamline position behind the head — palms pressed firmly together, not just touching. The palms-together position forces the core to engage and the body to stay flat and rigid. Toes should just break the surface. Hips up, head still and neutral. The kick drives from the hip, not the knee. Pressing palms together is the key cue — it locks the upper body into a strong streamline and prevents a lazy body position.', cat:'foundational' },
+    { name:'Kick on Back', cue:'Streamline on back, palms pressed together. Forces body position and core engagement.', desc:'Float on your back with arms extended in streamline position behind the head — palms pressed firmly together, not just touching. The palms-together position forces the core to engage and the body to stay flat and rigid. Toes should just break the surface. Hips up, head still and neutral.', cat:'foundational' },
     { name:'Side Kick (Back)', cue:'Kick on side, one arm extended behind head, rotate and stroke.', desc:'Roll to your side — one arm extended behind the head in line with the body, other arm at hip. Kick backstroke kick. Take 6 kicks then rotate to backstroke position with a single arm stroke. Develops balance, hip rotation, and connection between side position and backstroke pull.', cat:'foundational' },
-    { name:'Bucket Drill', cue:'Rest a pull buoy flat on your chest. Forces flat body position and strong kick.', desc:'Place a pull buoy flat on your chest and swim backstroke. The buoy resting on the chest forces you to keep your body flat and hips up — if the hips drop or the body angles, the buoy slides off. Excellent for developing body position awareness and a strong, consistent kick. Provides instant feedback when technique drops.', cat:'foundational' },
-
-    // TECHNICAL
-    { name:'OK Drill', cue:'Thumb exits first, pinky enters first. Hand orientation focus.', desc:'Swim backstroke focusing on hand orientation: thumb exits the water first on the finish, and pinky finger enters the water first on entry. This positions the hand for a better catch. The "OK" in the drill name refers to making an OK sign with your hand — thumb and index finger touching in a circle — which is the shape your hand makes when the thumb leads out and the pinky leads in. Critical for backstroke efficiency and catch angle.', cat:'technical' },
-    { name:'Single Arm (Back)', cue:'One arm strokes, other stays by side. Focus on deep entry and stroking shoulder clearing the water.', desc:'One arm performs the full backstroke stroke cycle while the other rests by the side of the body. Focus on two key points: a deep entry with the recovering hand (pinky in, reaching far back), and the stroking arm\'s shoulder visibly clearing the water on the recovery. The shoulder coming out of the water indicates proper body rotation. 6–8 kicks between each stroke. Alternate lengths.', cat:'technical' },
-    { name:'6-Kick Switch (Back)', cue:'6 kicks on side, rotate and take a backstroke. Same as free version.', desc:'Balance on your side — one arm extended behind, other at hip — and take 6 backstroke kicks. Then rotate and take a single backstroke stroke to the other side. 6 more kicks, then repeat. Develops rotation and timing of the backstroke pull relative to body position.', cat:'technical' },
-    { name:'Penguin Drill', cue:'Both elbows stay attached to sides of body throughout recovery. Forearms only recover.', desc:'During the backstroke recovery, both elbows remain in contact with the sides of the body — they do not lift away. Only the forearms recover, hinging from the elbow. This creates a very controlled, compact recovery that keeps the arms close and prevents a wide swinging motion. Excellent for swimmers who throw their arms wide or lose control of the recovery path.', cat:'technical' },
-    { name:'2L-2R', cue:'2 strokes left arm, 2 strokes right arm. Non-stroking arm by side, extends above head on 2nd stroke to commence its turn.', desc:'Swim 2 consecutive strokes with the left arm while the right arm rests by the side, then 2 strokes with the right arm while the left rests by the side. The non-stroking arm stays by the side of the body. On the 2nd stroke of the opposite arm, the resting arm begins to extend above the head — so it is ready to commence its 2 strokes immediately after. Develops strength, rhythm, and bilateral balance.', cat:'technical' },
-    { name:'Catch-up (Back)', cue:'Wait for hands to touch behind head before next stroke. Exaggerates glide.', desc:'The recovering arm must reach behind the head and touch the other hand before that arm begins its stroke. Creates an exaggerated glide and slows the stroke right down. Improves timing and feel for the extended position. Arms should be fully extended, not crossed.', cat:'technical' },
-    // APPLICATION
-    { name:'Spin Drill', cue:'Lift head as high as possible for set strokes, then same number of strokes fast in good body position.', desc:'Swim backstroke in two alternating phases. Phase 1: lift the head as HIGH as possible out of the water for a set number of strokes (e.g. 6) — this forces the hips down and makes the body work hard. Phase 2: immediately swim the same number of strokes with fast turnover in perfect body position, head neutral. The contrast between the two phases teaches the swimmer to feel the difference in body position and use it. Develops turnover rate and body awareness.', cat:'application' },
-    { name:'7-3-7 (Back)', cue:'7 kicks on side, 3 backstroke strokes, 7 kicks other side.', desc:'Balance on your side in backstroke position and kick for 7 kicks, then take 3 backstroke strokes and arrive on the other side. 7 more kicks, then 3 strokes back. Connects side-lying balance to the full backstroke cycle. Develops rotation timing and body awareness.', cat:'application' },
-    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
-    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+    { name:'Bucket Drill', cue:'Rest a pull buoy flat on your chest. Forces flat body position and strong kick.', desc:'Place a pull buoy flat on your chest and swim backstroke. The buoy resting on the chest forces you to keep your body flat and hips up — if the hips drop or the body angles, the buoy slides off. Excellent for developing body position awareness.', cat:'foundational' },
+    { name:'OK Drill', cue:'Thumb exits first, pinky enters first. Hand orientation focus.', desc:'Swim backstroke focusing on hand orientation: thumb exits the water first on the finish, and pinky finger enters the water first on entry. This positions the hand for a better catch. Critical for backstroke efficiency and catch angle.', cat:'technical' },
+    { name:'Single Arm (Back)', cue:'One arm strokes, other stays by side. Focus on deep entry and shoulder clearing the water.', desc:'One arm performs the full backstroke stroke cycle while the other rests by the side. Focus on: a deep entry with the recovering hand (pinky in), and the stroking arm\'s shoulder visibly clearing the water on recovery. 6–8 kicks between each stroke.', cat:'technical' },
+    { name:'6-Kick Switch (Back)', cue:'6 kicks on side, rotate and take a backstroke. Same as free version.', desc:'Balance on your side in backstroke position and kick for 7 kicks, then take a single backstroke stroke to the other side. Develops rotation and timing of the backstroke pull relative to body position.', cat:'technical' },
+    { name:'Penguin Drill', cue:'Both elbows stay attached to sides throughout recovery. Forearms only.', desc:'During the backstroke recovery, both elbows remain in contact with the sides of the body. Only the forearms recover, hinging from the elbow. Excellent for swimmers who throw their arms wide or lose control of the recovery path.', cat:'technical' },
+    { name:'2L-2R', cue:'2 strokes left arm, 2 strokes right arm. Non-stroking arm by side.', desc:'Swim 2 consecutive strokes with the left arm while the right arm rests by the side, then 2 strokes with the right while the left rests. Develops strength, rhythm, and bilateral balance.', cat:'technical' },
+    { name:'Catch-up (Back)', cue:'Wait for hands to touch behind head before next stroke. Exaggerates glide.', desc:'The recovering arm must reach behind the head and touch the other hand before that arm begins its stroke. Creates an exaggerated glide and slows the stroke right down. Improves timing and feel for the extended position.', cat:'technical' },
+    { name:'Spin Drill', cue:'Head high for set strokes, then same number fast in good position.', desc:'Phase 1: lift the head as HIGH as possible for a set number of strokes. Phase 2: swim the same number of strokes with fast turnover in perfect body position. The contrast teaches body position awareness.', cat:'application' },
+    { name:'7-3-7 (Back)', cue:'7 kicks on side, 3 backstroke strokes, 7 kicks other side.', desc:'Balance on your side in backstroke position and kick for 7 kicks, then take 3 backstroke strokes and arrive on the other side. 7 more kicks, then 3 strokes back.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Focus on applying the technique from the drill block.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Technique must be sustained over a full length and turn.', cat:'application' },
   ],
-
   breast: [
-    // FOUNDATIONAL
-    { name:'Kick on Back (Breast)', cue:'Two options: streamline on back, OR hands by side touching feet behind glutes. Knees stay under.', desc:'Float on your back and perform breaststroke kick. Two variations: Option 1 — arms in streamline overhead, palms together. Option 2 — arms by your side; as heels draw up, hands reach back to touch the feet behind the glutes, then kick out and around. Option 2 gives immediate feedback on heel height — if you can\'t touch your feet, the heels aren\'t coming up far enough. In both options, knees must not break the surface. Feel the squeeze and glide phase when legs are straight. Eyes look up to the ceiling.', cat:'foundational' },
-    { name:'Kick on Front (arms by side)', cue:'Arms by side, heels draw up to touch hands near glutes. Narrow kick is correct.', desc:'Float face down with arms by your side. Perform breaststroke kick — the starting motion is heels drawing up toward the glutes. The heels should touch or nearly touch the hands (which are resting by your sides near the hips/glutes) before the feet turn out and kick around and back in a circular sweep before squeezing together in streamline. This is a useful check — if heels can\'t reach the hands, the recovery isn\'t high enough. A narrow kick is correct technique. Breathe by lifting head forward.', cat:'foundational' },
-    { name:'Wall Kick', cue:'Hold the wall, kick reps. Lets coach see and correct feet directly.', desc:'Hold the wall with both hands and perform repeated breaststroke kicks. The coach can watch the feet from above or below. Common corrections: knees too wide, heels not coming up enough, toes not turning out, no glide phase. Great for isolated feedback and repetition of the kick pattern.', cat:'foundational' },
-    { name:'Scull + Kick', cue:'Arms sculling, legs doing breaststroke kick. Isolates kick with momentum.', desc:'Arms scull continuously — small figure-eight movements in front — while performing breaststroke kick normally. The sculling generates some forward momentum so the drill feels more like swimming. Allows the swimmer to focus entirely on the kick without worrying about the pull timing.', cat:'foundational' },
-
-    // TECHNICAL
-    { name:'1L-1R-1Both', cue:'1 kick left leg, 1 right leg, 1 both. Fixes asymmetric kick.', desc:'Perform breaststroke kick but alternate: one kick with the left leg only, one kick with the right leg only, then one kick with both legs together. Identifies and corrects asymmetric kickers who have a dominant leg. The isolations reveal which side is weaker or different. Repeat continuously.', cat:'technical' },
-    { name:'Head Down Drill', cue:'2 strokes head down eyes to bottom (no breath), then 1 normal stroke with breath. Forces deep hands and forearm engagement.', desc:'Swim breaststroke in a repeating 3-stroke pattern. Strokes 1 and 2: keep the head down, eyes looking at the pool floor, no breath. The head-down position forces the hands to pull deep and engage the forearms properly — if the hands stay shallow, the head will drag on the water. Stroke 3: normal breaststroke with a breath. The contrast between the head-down strokes and the normal stroke gives immediate feedback on hand depth and forearm engagement.', cat:'technical' },
-    { name:'Cross-Hand Drill', cue:'Grab left foot with right hand behind back, swim one length. Reverse back.', desc:'Reach behind your back and grab your left foot with your right hand. Now swim breaststroke with one arm only using the other arm for the full length. On the way back, switch — right foot in left hand. Extreme hip flexibility and knee tracking drill. Creates unusual body awareness of the kick mechanics.', cat:'technical' },
-    { name:'2K-1P', cue:'Two kicks per one pull. Slows the pull, forces glide phase.', desc:'Swim breaststroke with two kicks for every one pull. This slows the pull right down, forces a glide phase after each kick, and prevents the rushing tendency most junior swimmers have. The timing becomes: kick-kick-pull rather than the usual kick-pull. Excellent for developing feel for the glide.', cat:'technical' },
-    { name:'BR Pause Drill', cue:'Full pause in extended position before pulling. Exaggerates glide.', desc:'Swim breaststroke but add a deliberate, extended pause when both arms are fully extended in front — count 1-2-3 before initiating the pull. Forces a glide phase. Prevents the pulling hands from dropping before the kick is complete. The arms should be streamlined and extended, not scooping prematurely. Excellent for developing feel for the glide and correcting a rushed stroke.', cat:'technical' },
-    { name:'Fingertip Lead', cue:'Pull with just fingertips, forces wider catch before pulling in.', desc:'Perform the breaststroke pull but only use the fingertips — imagine the palms have been removed. This forces the hands to press wide and out before pulling in, preventing the common narrow straight-back pull. Develops a proper wide catch position. Graduate to full hands after several lengths.', cat:'technical' },
-
-    // APPLICATION
-    { name:'Tarzan Breaststroke', cue:'Head up breaststroke. Forces pull to generate lift and drive.', desc:'Swim breaststroke with the head held up looking forward the entire length — like Tarzan swimming through the jungle. To keep the head up, the pull must be powerful and generate real forward and upward drive. Hips will drop — the swimmer must compensate with a strong kick. Excellent power developer.', cat:'application' },
-    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
-    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+    { name:'Kick on Back (Breast)', cue:'Two options: streamline on back, OR hands by side touching feet behind glutes. Knees stay under.', desc:'Float on your back and perform breaststroke kick. Option 1: arms in streamline. Option 2: arms by side; heels draw up and hands reach back to touch the feet. Option 2 gives immediate feedback on heel height. In both options, knees must not break the surface.', cat:'foundational' },
+    { name:'Kick on Front (arms by side)', cue:'Arms by side, heels draw up to touch hands near glutes. Narrow kick is correct.', desc:'Float face down with arms by your side. Perform breaststroke kick — heels draw up toward the glutes and should touch the hands (resting by the hips). A narrow kick is correct technique.', cat:'foundational' },
+    { name:'Wall Kick', cue:'Hold the wall, kick reps. Lets coach see and correct feet directly.', desc:'Hold the wall with both hands and perform repeated breaststroke kicks. The coach can watch the feet from above or below. Common corrections: knees too wide, heels not coming up enough, toes not turning out, no glide phase.', cat:'foundational' },
+    { name:'Scull + Kick', cue:'Arms sculling, legs doing breaststroke kick. Isolates kick with momentum.', desc:'Arms scull continuously while performing breaststroke kick normally. The sculling generates forward momentum so the drill feels more like swimming. Focus entirely on the kick without worrying about pull timing.', cat:'foundational' },
+    { name:'1L-1R-1Both', cue:'1 kick left leg, 1 right leg, 1 both. Fixes asymmetric kick.', desc:'Perform breaststroke kick but alternate: one kick with the left leg only, one kick with the right leg only, then one kick with both legs together. Identifies and corrects asymmetric kickers.', cat:'technical' },
+    { name:'Head Down Drill', cue:'2 strokes head down (no breath), then 1 normal stroke with breath. Forces deep hands.', desc:'Swim breaststroke in a 3-stroke pattern. Strokes 1–2: keep the head down, eyes on the pool floor, no breath. Stroke 3: normal breaststroke with breath. The head-down position forces the hands to pull deep and engage the forearms properly.', cat:'technical' },
+    { name:'Cross-Hand Drill', cue:'Grab left foot with right hand behind back, swim one length. Reverse back.', desc:'Reach behind your back and grab your left foot with your right hand. Swim breaststroke with one arm. On the way back, switch. Extreme hip flexibility and knee tracking drill.', cat:'technical' },
+    { name:'2K-1P', cue:'Two kicks per one pull. Slows the pull, forces glide phase.', desc:'Swim breaststroke with two kicks for every one pull. The timing becomes: kick-kick-pull. Excellent for developing feel for the glide.', cat:'technical' },
+    { name:'BR Pause Drill', cue:'Full pause in extended position before pulling. Exaggerates glide.', desc:'Add a deliberate pause when both arms are fully extended in front — count 1-2-3 before initiating the pull. Prevents the pulling hands from dropping before the kick is complete.', cat:'technical' },
+    { name:'Fingertip Lead', cue:'Pull with just fingertips, forces wider catch before pulling in.', desc:'Perform the breaststroke pull using only the fingertips. Forces the hands to press wide and out before pulling in, preventing the common narrow straight-back pull.', cat:'technical' },
+    { name:'Tarzan Breaststroke', cue:'Head up breaststroke. Forces pull to generate lift and drive.', desc:'Swim breaststroke with the head held up looking forward the entire length. To keep the head up, the pull must be powerful and generate real forward and upward drive.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Focus on applying the technique from the drill block.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Technique must be sustained over a full length and turn.', cat:'application' },
   ],
-
   fly: [
-    // FOUNDATIONAL
-    { name:'Superman Kick', cue:'Arms extended front, pure dolphin kick. Feel body undulation.', desc:'Push off the wall in streamline and perform dolphin kick with arms extended forward — like Superman flying. Focus entirely on the undulation of the body: chest presses down, hips come up, then hips press down and feet kick up. The wave travels from chest to feet. Breathe every 4–6 kicks.', cat:'foundational' },
-    { name:'Man from Atlantis', cue:'Submerge with arms by side, kick as far as possible underwater. Forces upward AND downward kick — not just downward.', desc:'Push off and drop below the surface with arms resting by your side. Dolphin kick as far as possible underwater. With no arms to balance, the swimmer is forced to kick in both directions — up AND down — to generate propulsion and stay level. Swimmers who only kick downward will immediately surface. Excellent for teaching the full two-directional dolphin kick and body undulation. Compete with teammates to see who travels furthest.', cat:'foundational' },
-    { name:'Chest Press Kick', cue:'Arms resting on a kickboard (not holding it). Press chest down to drive hips up.', desc:'Rest your arms on top of a kickboard — do not grip it. Focus on pressing the chest down into the water to drive the hips upward. The kick comes from the hips rising — not just the feet moving. This is the fundamental undulation cue for butterfly. Resting (not holding) the board keeps the arms relaxed and keeps the focus entirely on the body wave. Without this chest-press action, butterfly becomes flat and inefficient.', cat:'foundational' },
-
-    // TECHNICAL
-    { name:'Single Arm Fly', cue:'One arm pulls, other extended front. 2 kicks per cycle — kick on hand entry, kick on hand exit.', desc:'One arm performs a full butterfly stroke while the other remains extended in front. Two dolphin kicks per stroke cycle: the first kick happens as the hand enters the water at the front, the second kick happens as the hand exits at the back of the pull. This timing is the foundation of butterfly rhythm. Breathe to the side of the stroking arm. Alternate arms each length.', cat:'technical' },
-    { name:'3-Kick Fly', cue:'Kick on entry, middle kick (arms front, press chest), kick on exit. Slows it right down.', desc:'Swim butterfly with three dolphin kicks per arm stroke. Timing: first kick as hands enter at the front, second kick while arms are extended in front (press the chest down during this kick), third kick as hands exit at the back of the pull. The middle kick with arms held in front is key — it reinforces the chest-press undulation. Slows the stroke down and builds feel for each phase separately.', cat:'technical' },
-    { name:'2-2-2', cue:'2 left arm, 2 right arm, 2 both arms. Breathe to the side on single arm strokes. No breath on the double strokes.', desc:'Swim 2 strokes with the left arm only (right arm extended front), then 2 strokes with the right arm only (left arm extended front), then 2 full butterfly strokes with both arms. Repeat continuously. On the single arm phases, breathe to the side — like freestyle — which is more achievable and keeps the drill flowing. On the double arm phase, no breath — focus on the full butterfly technique. Arms extended when not stroking.', cat:'technical' },
-    { name:'Biondi Drill', cue:'Full pull, arms hold at hips as head submerges. Perform a set number of kicks, then slowly recover arms underwater before next pull.', desc:'Perform a full butterfly pull — but as the head goes underwater after the breath, both arms hold at the hips rather than immediately recovering. While held at the hips, perform a set number of dolphin kicks (e.g. 3). Then slowly recover the arms forward underwater before the next pull. The underwater recovery is deliberate and controlled — not rushed. Develops feel for the finish of the pull, prevents a rushed recovery, and builds kick strength during the hold phase. Named after Matt Biondi.', cat:'technical' },
-    { name:'6K-1Pull', cue:'6 dolphin kicks then one full stroke. Forces breath at the start of the pull, not the end.', desc:'Take 6 dolphin kicks in streamline position, then perform one complete butterfly stroke. Repeat continuously. The extended kick phase before each stroke builds kick strength and highlights the kick-to-pull timing connection. Importantly, the breath is taken at the start of the pull — as the hands begin their sweep outward — not at the end. This trains correct butterfly breathing timing and prevents late breathing which disrupts the stroke.', cat:'technical' },
-
-    // APPLICATION
-    { name:'2Fly-2Breast', cue:'2 butterfly strokes then 2 breaststroke. Rhythm and timing contrast.', desc:'Alternate 2 full butterfly strokes with 2 breaststroke strokes continuously. The transition between strokes develops timing awareness and rhythm. The breaststroke gives recovery time, making the fly strokes more achievable. Good for building confidence and endurance in butterfly without full stroke overload.', cat:'application' },
-    { name:'Heads-up Fly', cue:'Head stays up the whole length. Forces powerful pull to generate lift.', desc:'Swim butterfly with the head held up looking forward — do not submerge the head at all. To keep the head up, the pull must be explosive and generate significant forward drive. The kick becomes critical. Great for developing power and the feeling of driving forward with the pull rather than just moving arms.', cat:'application' },
-    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Coach sets reps and rest on deck. Focus on applying the technique from the drill block — transfer the feel into full stroke swimming.', cat:'application' },
-    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Coach sets reps and rest on deck. Technique must be sustained over a full length and turn — focus on maintaining the drill work through the back half. Good progression from Fast 25s.', cat:'application' },
+    { name:'Superman Kick', cue:'Arms extended front, pure dolphin kick. Feel body undulation.', desc:'Push off the wall in streamline and perform dolphin kick with arms extended forward. Focus on the undulation of the body: chest presses down, hips come up, then hips press down and feet kick up. The wave travels from chest to feet.', cat:'foundational' },
+    { name:'Man from Atlantis', cue:'Submerge with arms by side, kick as far as possible underwater. Forces upward AND downward kick.', desc:'Push off and drop below the surface with arms by your side. Dolphin kick as far as possible underwater. With no arms to balance, the swimmer must kick in both directions. Swimmers who only kick downward will immediately surface.', cat:'foundational' },
+    { name:'Chest Press Kick', cue:'Arms resting on a kickboard (not holding it). Press chest down to drive hips up.', desc:'Rest your arms on top of a kickboard — do not grip it. Focus on pressing the chest down into the water to drive the hips upward. The kick comes from the hips rising — not just the feet moving.', cat:'foundational' },
+    { name:'Single Arm Fly', cue:'One arm pulls, other extended front. 2 kicks per cycle — kick on hand entry, kick on hand exit.', desc:'One arm performs a full butterfly stroke while the other remains extended in front. Two dolphin kicks per stroke cycle: first kick as the hand enters, second kick as the hand exits at the back. Alternate arms each length.', cat:'technical' },
+    { name:'3-Kick Fly', cue:'Kick on entry, middle kick (arms front, press chest), kick on exit. Slows it right down.', desc:'Swim butterfly with three dolphin kicks per arm stroke. First kick as hands enter, second kick while arms are held in front (press chest down), third kick as hands exit. Slows the stroke down and builds feel for each phase.', cat:'technical' },
+    { name:'2-2-2', cue:'2 left arm, 2 right arm, 2 both arms. Breathe to side on single arm, no breath on double.', desc:'2 strokes left arm only, then 2 strokes right arm only, then 2 full butterfly strokes. On single arm phases, breathe to the side. On the double arm phase, no breath. Arms extended when not stroking.', cat:'technical' },
+    { name:'Biondi Drill', cue:'Full pull, arms hold at hips as head submerges. Set number of kicks, then recover underwater.', desc:'Perform a full butterfly pull — but as the head goes underwater, both arms hold at the hips. Perform set number of dolphin kicks (e.g. 3). Then slowly recover arms forward underwater before next pull. Develops feel for the finish of the pull.', cat:'technical' },
+    { name:'6K-1Pull', cue:'6 dolphin kicks then one full stroke. Breath at the START of the pull, not the end.', desc:'Take 6 dolphin kicks in streamline, then perform one complete butterfly stroke. The breath is taken at the start of the pull — as the hands begin sweeping outward — not at the end. Trains correct butterfly breathing timing.', cat:'technical' },
+    { name:'2Fly-2Breast', cue:'2 butterfly strokes then 2 breaststroke. Rhythm and timing contrast.', desc:'Alternate 2 full butterfly strokes with 2 breaststroke strokes continuously. The breaststroke gives recovery time, making the fly strokes more achievable.', cat:'application' },
+    { name:'Heads-up Fly', cue:'Head stays up the whole length. Forces powerful pull to generate lift.', desc:'Swim butterfly with the head held up looking forward — do not submerge the head. The pull must be explosive and generate significant forward drive. The kick becomes critical.', cat:'application' },
+    { name:'Fast 25s', cue:'Race pace 25s of stroke. Apply everything from the drill block.', desc:'Swim 25m at race pace. Focus on applying the technique from the drill block.', cat:'application' },
+    { name:'Fast 50s', cue:'Race pace 50s of stroke. Sustained application of technique.', desc:'Swim 50m at race pace. Technique must be sustained over a full length and turn.', cat:'application' },
   ]
 };
 
+// ============================================================
+// WARMUP OPTIONS (with coaching cues)
+// ============================================================
 const WARMUP_OPTIONS = [
-  { name:'200 Freestyle', desc:'4 laps (50m pool) or 8 laps (25m pool) easy freestyle. Own pace. Focus on long smooth strokes and relaxed breathing.', dist:'200m' },
-  { name:'300 Choice + Kick', desc:'200m choice of stroke (own pace), then 100m kick. 6 laps choice + 2 laps kick (50m pool) or 12 laps + 4 laps (25m pool).', dist:'300m' },
-  { name:'300 Freestyle', desc:'6 laps (50m pool) or 12 laps (25m pool) easy freestyle. Slightly more advanced groups. Long, relaxed and smooth.', dist:'300m' },
-  { name:'8x25 IM Order', desc:'2 laps each stroke in IM order: butterfly, backstroke, breaststroke, freestyle. Own pace, focus on feel for each stroke.', dist:'200m' },
-  { name:'200 Drill/Swim by 25', desc:'Alternate 25m any drill / 25m easy swim. Athletes choose their own drill. 4 laps (50m pool) or 8 laps (25m pool).', dist:'200m' },
+  {
+    name:'200 Freestyle',
+    dist:'200m',
+    desc:'4 laps (50m pool) or 8 laps (25m pool) easy freestyle. Own pace. Focus on long smooth strokes and relaxed breathing.',
+    cues:['Let swimmers find their own rhythm — no rushing', 'Watch for head position: eyes down, not forward', 'Call out "long strokes" if you see short choppy arms', 'This is activation, not a race — keep it easy']
+  },
+  {
+    name:'300 Choice + Kick',
+    dist:'300m',
+    desc:'200m choice of stroke (own pace), then 100m kick. 6 laps choice + 2 laps kick (50m pool) or 12 laps + 4 laps (25m pool).',
+    cues:['Let them choose their strongest stroke for confidence', 'On the kick section: watch for bent knees and poor ankle flex', 'Boards optional — encourage no-board kick for better body position', 'Good opportunity to walk the lane and give individual feedback']
+  },
+  {
+    name:'300 Freestyle',
+    dist:'300m',
+    desc:'6 laps (50m pool) or 12 laps (25m pool) easy freestyle. Slightly more advanced groups. Long, relaxed and smooth.',
+    cues:['Cue "long and low" — reach forward, push back', 'Watch for early breathing (head up before the pull is complete)', 'No rushing — if a swimmer is red-faced, they\'re going too hard', 'Use this time to identify who needs attention in the main set']
+  },
+  {
+    name:'8x25 IM Order',
+    dist:'200m',
+    desc:'2 laps each stroke in IM order: butterfly, backstroke, breaststroke, freestyle. Own pace, focus on feel for each stroke.',
+    cues:['Start with fly while they\'re freshest — keep it short', 'On backstroke: watch for body rotation and arm entry position', 'On breaststroke: look for symmetry in the kick', 'On freestyle: cue the rotation to match what they did on backstroke']
+  },
+  {
+    name:'200 Drill/Swim by 25',
+    dist:'200m',
+    desc:'Alternate 25m any drill / 25m easy swim. Athletes choose their own drill. 4 laps (50m pool) or 8 laps (25m pool).',
+    cues:['Ask each swimmer what drill they\'re doing so you can give targeted feedback', 'Watch that drill lengths are actually drills — not just slow swimming', 'Good for advanced groups who know the library', 'Validate their choices: "good choice for your freestyle"']
+  },
 ];
 
 // ============================================================
-// STATE
+// GAMES LIBRARY
 // ============================================================
-let session = {
-  warmup: null,
-  blocks: [], // { stroke, drills: [{...drill}] }
-  name: ''
-};
-
-let currentEditingBlock = null; // index of block being edited, or 'new'
-let currentEditingStroke = null;
-let currentDrillCat = 'foundational';
-
-// ============================================================
-// NAVIGATION
-// ============================================================
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-  window.scrollTo(0,0);
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
+const GAMES = [
+  // RELAY
+  { name:'Lane Wars', cat:'relay', icon:'⚡', cue:'Team relay — first team to finish wins. Split squad into 2 lanes.', desc:'Split the squad into two equal teams, one per lane. Each swimmer completes one length before tagging the next. Coach decides stroke — usually freestyle. First team to have all swimmers finish wins. Keep score across multiple rounds.', how:'Set teams before getting in. Stand between the lanes to judge the finish. Run 3 rounds and keep a tally. Award a champion team at the end.' },
+  { name:'Stroke Relay', cat:'relay', icon:'🏆', cue:'Each swimmer swims a different stroke. IM order or coach choice.', desc:'Each team member is assigned a different stroke for their leg of the relay. IM order works well (fly, back, breast, free). Encourages all strokes and gives every swimmer a role. Teams must decide who swims which stroke.', how:'Let teams huddle for 60 seconds to decide stroke order. Go lane by lane if pool is narrow. Award bonus points for best technique, not just speed.' },
+  { name:'Medley Madness', cat:'relay', icon:'🌀', cue:'Each swimmer does a lap in a different stroke — coach calls it on the fly.', desc:'Like a relay but the coach calls out the stroke for each leg as the swimmer is tagging. Keeps everyone paying attention and adds an element of surprise. Swimmers must adapt quickly.', how:'Stand at the end of the pool and call each stroke loudly as the tag happens. Keep it fast and unpredictable. Great for the last 10 minutes of a session.' },
+  { name:'Tugboat Relay', cat:'relay', icon:'🚤', cue:'One swimmer in streamline being pushed by a partner kicking behind them. Switch halfway.', desc:'Pairs up swimmers. One goes in streamline (arms locked, body straight), the other gets behind and holds their feet while kicking freestyle to push them. Switch roles at the halfway mark. Develops teamwork and streamline body position.', how:'Coach checks streamline before each pair starts. Time each pair and keep a leaderboard. Emphasize that the streamliner can\'t help by kicking — pure position.' },
+  // SKILL
+  { name:'Torpedo Challenge', cat:'skill', icon:'🎯', cue:'Underwater streamline push-off — who travels furthest without surfacing?', desc:'Each swimmer pushes off the wall in streamline underwater and holds it as long as possible without surfacing. A marker (cone, kickboard) is placed where they surface. The swimmer who travels furthest wins each round.', how:'Use the lane ropes or pool tiles to measure. Run 3 attempts per swimmer, count the best. Watch for cheating — feet must leave the wall properly. Great for developing streamline awareness.' },
+  { name:'Target Kick', cat:'skill', icon:'🎰', cue:'Kick across the pool and stop exactly on a target tile. Precision, not speed.', desc:'Swimmers start kicking with a board from one end. The coach places a hat, cone or kickboard at a random distance. Swimmers must stop exactly on the target using only their kick — no arms to brake. Closest swimmer wins. Varies by distance each round.', how:'Place the target at a different distance each round. Award 1 point for within 1m, 3 points for within 50cm. Keep a running score across 5 rounds.' },
+  { name:'Flip Turn Competition', cat:'skill', icon:'🔄', cue:'Who can do the most consecutive legal flip turns in 60 seconds?', desc:'Swimmers push off and do a flip turn at each end, counting every legal turn. Feet must touch the wall each time. Coach starts and stops a 60-second timer. Most turns wins. Rewards fast underwaters and quick turns.', how:'Position yourself at one end to watch technique and count. Call out illegal turns (stepping, missing the wall). Run heats if the pool is small.' },
+  { name:'Dive and Glide', cat:'skill', icon:'🏹', cue:'Jump or dive in and hold streamline. Furthest glide before touching the lane rope wins.', desc:'From the starting block or pool edge, swimmers dive or jump in and immediately lock into streamline — no kicking. The swimmer who travels furthest before touching the water surface or a lane rope wins. Purely tests entry and streamline quality.', how:'Line swimmers up. One at a time off the block. Award points for both distance and technique. Give feedback on entry angle — too steep = too deep, too flat = too much splash.' },
+  // TEAM
+  { name:'Ball of the Wall', cat:'team', icon:'🏐', cue:'Water polo-style keep-away. First team to 5 passes without interception wins.', desc:'Use a water polo ball or any floating ball. Two teams keep the ball away from each other. A point is scored after 5 consecutive passes without an interception or the ball hitting the wall. No swimming while holding the ball — pivot foot only.', how:'Set boundaries (e.g. between the flags). No dunking or grabbing swimmers. Coach refs from the side. First team to 3 points wins the game. Reset ball possession with a jump ball at centre.' },
+  { name:'Shark and Minnows', cat:'team', icon:'🦈', cue:'One shark, everyone else swims across. Tagged swimmers become sharks.', desc:'Classic pool game. One swimmer is the shark and starts in the middle of the pool. All others (minnows) must swim from one end to the other without being tagged. Tagged swimmers join the shark. Last minnow standing wins and is the next shark.', how:'Sharks must tag with an open hand — no grabbing. Minnows can go in any lane. Go wide is a valid strategy. Works best in a 25m pool. Usually lasts 3–5 minutes per round.' },
+  { name:'Freeze Frame', cat:'team', icon:'❄️', cue:'Coach calls "freeze" — everyone stops exactly where they are. Last team all frozen loses a point.', desc:'Both teams swim continuously. At random intervals the coach calls "FREEZE!" — every swimmer must stop dead in the water immediately. Any swimmer still moving loses a point for their team. Tests reaction time and body control.', how:'Call freeze at unpredictable intervals — sometimes very quickly, sometimes after a long pause. Be consistent in judging movement. Run for 5 minutes, team with fewest penalty points wins.' },
+];
 
 // ============================================================
-// HOME
-// ============================================================
-function startBuild() {
-  session = { warmup: null, blocks: [], name: '' };
-  renderWarmupList();
-  showScreen('warmup');
-}
-
-function renderSavedSessions() {
-  const saved = loadFromStorage('sc_sessions') || [];
-  const el = document.getElementById('savedSessionsList');
-  if (saved.length === 0) {
-    el.innerHTML = `<div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>`;
-    return;
-  }
-  el.innerHTML = saved.map((s, i) => `
-    <div class="saved-session-card" onclick="loadSavedSession(${i})">
-      <div>
-        <div class="saved-session-name">${s.name || 'Untitled Session'}</div>
-        <div class="saved-session-meta">${s.blocks.length} stroke block${s.blocks.length !== 1 ? 's' : ''} · ${s.savedAt ? new Date(s.savedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
-      </div>
-      <div style="color:var(--silver);font-size:18px;">›</div>
-    </div>`).join('');
-}
-
-function loadSavedSession(idx) {
-  const saved = loadFromStorage('sc_sessions') || [];
-  session = JSON.parse(JSON.stringify(saved[idx]));
-  renderPreview();
-  showScreen('preview');
-}
-
-// ============================================================
-// WARMUP
+// WARMUP FUNCTIONS
 // ============================================================
 function renderWarmupList() {
   const el = document.getElementById('warmupList');
   el.innerHTML = WARMUP_OPTIONS.map((w, i) => `
     <div class="warmup-card ${session.warmup === i ? 'selected' : ''}" onclick="selectWarmup(${i},this)">
-      <div class="warmup-name">${w.name} <span style="color:var(--silver);font-size:12px;font-family:'Barlow Condensed',sans-serif;">${w.dist}</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="warmup-name">${w.name} <span style="color:var(--silver);font-size:12px;font-family:'Barlow Condensed',sans-serif;">${w.dist}</span></div>
+        <button class="drill-info-btn" onclick="event.stopPropagation();showWarmupInfo(${i})">ⓘ</button>
+      </div>
       <div class="warmup-desc">${w.desc}</div>
     </div>`).join('');
 }
@@ -974,14 +1184,76 @@ function selectWarmup(idx, el) {
   el.classList.add('selected');
 }
 
+function showWarmupInfo(idx) {
+  const w = WARMUP_OPTIONS[idx];
+  document.getElementById('modalWarmupName').textContent = w.name;
+  document.getElementById('modalWarmupDist').textContent = w.dist + ' — WARM UP';
+  document.getElementById('modalWarmupDesc').textContent = w.desc;
+  document.getElementById('modalWarmupCues').innerHTML = w.cues.map(c => `<div style="margin-bottom:6px;">• ${c}</div>`).join('');
+  document.getElementById('warmupInfoModal').classList.add('active');
+}
+
 function goToStrokes() {
   if (session.warmup === null) {
-    // Auto-select first if none chosen
     session.warmup = 0;
     renderWarmupList();
   }
   renderAddedBlocks();
   showScreen('strokes');
+}
+
+// ============================================================
+// GAMES FUNCTIONS
+// ============================================================
+let currentGameCat = 'relay';
+
+function renderGamesList() {
+  showGameCat(currentGameCat, document.getElementById('gtab-' + currentGameCat));
+}
+
+function showGameCat(cat, tabEl) {
+  currentGameCat = cat;
+  const tabs = document.querySelectorAll('#screen-games .cat-tab');
+  tabs.forEach(t => t.className = 'cat-tab');
+  if (cat === 'relay') tabEl.className = 'cat-tab active-found';
+  else if (cat === 'skill') tabEl.className = 'cat-tab active-tech';
+  else tabEl.className = 'cat-tab active-app';
+
+  const games = GAMES.filter(g => g.cat === cat);
+  const el = document.getElementById('gamesList');
+  el.innerHTML = games.map(g => {
+    const isSelected = session.game && session.game.name === g.name;
+    return `
+    <div class="drill-item ${isSelected ? 'selected' : ''}" onclick="toggleGame('${g.name.replace(/'/g,"\\'")}')">
+      <div class="drill-check" style="${isSelected ? 'background:var(--purple);border-color:var(--purple);color:#fff;' : ''}">${isSelected ? '✓' : ''}</div>
+      <div class="drill-info">
+        <div class="drill-name">${g.icon} ${g.name}</div>
+        <div class="drill-cue">${g.cue}</div>
+      </div>
+      <button class="drill-info-btn" onclick="event.stopPropagation();showGameInfo('${g.name.replace(/'/g,"\\'")}')">ⓘ</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleGame(name) {
+  const game = GAMES.find(g => g.name === name);
+  if (!game) return;
+  if (session.game && session.game.name === name) {
+    session.game = null;
+  } else {
+    session.game = {...game};
+  }
+  showGameCat(currentGameCat, document.getElementById('gtab-' + currentGameCat));
+}
+
+function showGameInfo(name) {
+  const g = GAMES.find(g => g.name === name);
+  if (!g) return;
+  document.getElementById('modalGameName').textContent = g.icon + ' ' + g.name;
+  document.getElementById('modalGameType').textContent = g.cat.toUpperCase() + ' GAME';
+  document.getElementById('modalGameDesc').textContent = g.desc;
+  document.getElementById('modalGameHow').innerHTML = g.how.split('. ').map(s => s ? `<div style="margin-bottom:6px;">• ${s}.</div>` : '').join('');
+  document.getElementById('gameInfoModal').classList.add('active');
 }
 
 // ============================================================
@@ -1013,7 +1285,6 @@ function renderAddedBlocks() {
 }
 
 function addStrokeBlock(stroke) {
-  // No block limit — coach can add as many blocks as needed
   currentEditingBlock = 'new';
   currentEditingStroke = stroke;
   openDrillPicker(stroke);
@@ -1030,21 +1301,22 @@ function removeBlock(idx) {
   renderAddedBlocks();
 }
 
+let currentEditingBlock = null;
+let currentEditingStroke = null;
+let currentDrillCat = 'foundational';
+let pendingDrills = [];
+
 function openDrillPicker(stroke) {
   const labels = STROKE_LABELS[stroke];
   document.getElementById('drillPickerTitle').textContent = labels + ' DRILLS';
   document.getElementById('drillPickerSub').textContent = 'Select drills for this block — tap ⓘ for details';
   currentDrillCat = 'foundational';
-  // Reset tabs
   document.getElementById('tab-found').className = 'cat-tab active-found';
   document.getElementById('tab-tech').className = 'cat-tab';
   document.getElementById('tab-app').className = 'cat-tab';
-
-  // Reset pendingDrills for new blocks
   if (currentEditingBlock === 'new') {
     pendingDrills = [];
   }
-
   renderDrillList(stroke, 'foundational');
   renderSelectedDrillsOrder();
   showScreen('drills');
@@ -1052,7 +1324,7 @@ function openDrillPicker(stroke) {
 
 function showDrillCat(cat, tabEl) {
   currentDrillCat = cat;
-  const tabs = document.querySelectorAll('.cat-tab');
+  const tabs = document.querySelectorAll('#screen-drills .cat-tab');
   tabs.forEach(t => t.className = 'cat-tab');
   if (cat === 'foundational') tabEl.className = 'cat-tab active-found';
   else if (cat === 'technical') tabEl.className = 'cat-tab active-tech';
@@ -1064,16 +1336,13 @@ function renderDrillList(stroke, cat) {
   const drills = DRILLS[stroke].filter(d => d.cat === cat);
   const currentDrills = getActiveDrills();
   const selectedNames = currentDrills.map(d => d.name);
-
   const el = document.getElementById('drillList');
   if (drills.length === 0) {
     el.innerHTML = `<div class="empty-state">No drills in this category.</div>`;
     return;
   }
-
   el.innerHTML = drills.map(drill => {
     const isSelected = selectedNames.includes(drill.name);
-    const catBadge = cat === 'foundational' ? 'badge-found' : cat === 'technical' ? 'badge-tech' : 'badge-app';
     return `
     <div class="drill-item ${isSelected ? 'selected' : ''}" id="drill-${sanitizeId(drill.name)}" onclick="toggleDrill('${stroke}','${cat}','${drill.name.replace(/'/g,"\\'")}')">
       <div class="drill-check">${isSelected ? '✓' : ''}</div>
@@ -1086,30 +1355,7 @@ function renderDrillList(stroke, cat) {
   }).join('');
 }
 
-function sanitizeId(name) {
-  return name.replace(/[^a-zA-Z0-9]/g, '_');
-}
-
-function toggleDrill(stroke, cat, drillName) {
-  const block = session.blocks[currentEditingBlock];
-  if (!block) return;
-
-  const drill = DRILLS[stroke].find(d => d.name === drillName);
-  if (!drill) return;
-
-  const idx = block.drills.findIndex(d => d.name === drillName);
-  if (idx >= 0) {
-    block.drills.splice(idx, 1);
-  } else {
-    block.drills.push({...drill});
-  }
-
-  renderDrillList(stroke, currentDrillCat);
-  renderSelectedDrillsOrder();
-}
-
-// For new blocks, drills are stored in pendingDrills until saved
-let pendingDrills = [];
+function sanitizeId(name) { return name.replace(/[^a-zA-Z0-9]/g, '_'); }
 
 function getActiveDrills() {
   if (currentEditingBlock === 'new') return pendingDrills;
@@ -1120,14 +1366,9 @@ function toggleDrill(stroke, cat, drillName) {
   const drills = getActiveDrills();
   const drill = DRILLS[stroke].find(d => d.name === drillName);
   if (!drill) return;
-
   const idx = drills.findIndex(d => d.name === drillName);
-  if (idx >= 0) {
-    drills.splice(idx, 1);
-  } else {
-    drills.push({...drill});
-  }
-
+  if (idx >= 0) drills.splice(idx, 1);
+  else drills.push({...drill});
   renderDrillList(stroke, currentDrillCat);
   renderSelectedDrillsOrder();
 }
@@ -1136,12 +1377,7 @@ function renderSelectedDrillsOrder() {
   const drills = getActiveDrills();
   const panel = document.getElementById('selectedDrillsPanel');
   const orderEl = document.getElementById('selectedDrillsOrder');
-
-  if (!drills || drills.length === 0) {
-    panel.style.display = 'none';
-    return;
-  }
-
+  if (!drills || drills.length === 0) { panel.style.display = 'none'; return; }
   panel.style.display = 'block';
   orderEl.innerHTML = drills.map((drill, i) => `
     <div class="selected-drill-row">
@@ -1173,13 +1409,11 @@ function removeDrill(idx) {
 
 function saveDrillBlock() {
   if (currentEditingBlock === 'new') {
-    // Only save if drills were selected
     if (pendingDrills.length > 0) {
       session.blocks.push({ stroke: currentEditingStroke, drills: [...pendingDrills] });
     }
     pendingDrills = [];
   } else {
-    // Editing existing — remove if empty
     const block = session.blocks[currentEditingBlock];
     if (block && block.drills.length === 0) {
       session.blocks.splice(currentEditingBlock, 1);
@@ -1202,7 +1436,7 @@ function showDrillInfo(stroke, drillName) {
 }
 
 // ============================================================
-// PREVIEW & SESSION CARD
+// PREVIEW
 // ============================================================
 function goToPreview() {
   if (session.blocks.length === 0) {
@@ -1217,25 +1451,25 @@ function renderPreview() {
   const wu = WARMUP_OPTIONS[session.warmup];
   const now = new Date();
   document.getElementById('previewDate').textContent = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
-
   let html = '';
-
-  // Warmup block
   if (wu) {
+    const wuIdx = session.warmup;
     html += `
     <div class="session-warmup-block">
-      <div class="session-block-label">WARM UP</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--white);margin-bottom:4px;">${wu.name} <span style="color:var(--sky);font-size:14px;">${wu.dist}</span></div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+        <div>
+          <div class="session-block-label">WARM UP</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--white);">${wu.name} <span style="color:var(--sky);font-size:14px;">${wu.dist}</span></div>
+        </div>
+        <button class="drill-info-btn" onclick="showWarmupInfo(${wuIdx})">ⓘ</button>
+      </div>
       <div style="font-size:13px;color:var(--silver2);line-height:1.5;">${wu.desc}</div>
     </div>`;
   }
-
-  // Stroke blocks
   session.blocks.forEach((block, bi) => {
     const color = STROKE_COLORS[block.stroke];
     const label = STROKE_LABELS[block.stroke];
     const emoji = STROKE_EMOJIS[block.stroke];
-
     html += `
     <div class="session-stroke-block">
       <div class="session-stroke-header border-${block.stroke}">
@@ -1258,28 +1492,235 @@ function renderPreview() {
       }).join('')}
     </div>`;
   });
-
+  if (session.game) {
+    html += `
+    <div class="session-warmup-block" style="border-left-color:var(--pink);">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+        <div>
+          <div class="session-block-label">FINISHER GAME</div>
+          <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--white);">${session.game.icon} ${session.game.name}</div>
+        </div>
+        <button class="drill-info-btn" onclick="showGameInfo('${session.game.name.replace(/'/g,"\\'")}')">ⓘ</button>
+      </div>
+      <div style="font-size:13px;color:var(--silver2);line-height:1.5;">${session.game.cue}</div>
+    </div>`;
+  }
   document.getElementById('previewContent').innerHTML = html;
 }
 
-function saveSession() {
-  const saved = loadFromStorage('sc_sessions') || [];
+// ============================================================
+// SAVE / LOAD SESSIONS
+// ============================================================
+async function saveSession() {
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = 'SAVING...';
+  btn.disabled = true;
+
   const name = `${session.blocks.map(b => STROKE_LABELS[b.stroke].substring(0,2)).join('+')} Session`;
   session.name = name;
   session.savedAt = new Date().toISOString();
-  saved.unshift(JSON.parse(JSON.stringify(session)));
-  saveToStorage('sc_sessions', saved);
-  renderSavedSessions();
+  session.savedBy = currentRole;
 
-  const btn = event.target;
-  const orig = btn.textContent;
+  // Always save to localStorage as backup
+  const localSaved = loadFromStorage('sc_sessions') || [];
+  localSaved.unshift(JSON.parse(JSON.stringify(session)));
+  saveToStorage('sc_sessions', localSaved);
+
+  // Save to Supabase
+  const result = await sb.insertSession(session, false);
+
   btn.textContent = 'SAVED ✓';
   btn.style.background = '#1a3a1a';
-  setTimeout(() => {
-    btn.textContent = orig;
-    btn.style.background = '';
-    showScreen('home');
-  }, 1500);
+
+  if (currentRole === 'admin' && result) {
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+      if (confirm('Publish this session to your coaches?')) {
+        sb.publishSession(result.id).then(() => {
+          renderSharedSessions();
+          alert('Session published! Your coaches can now see it.');
+          showScreen('home');
+        });
+      } else {
+        showScreen('home');
+      }
+    }, 1000);
+  } else {
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.disabled = false;
+      showScreen('home');
+    }, 1500);
+  }
+  renderSavedSessions();
+}
+
+async function publishExistingSession(supabaseId, btnEl) {
+  btnEl.textContent = '...';
+  btnEl.disabled = true;
+  await sb.publishSession(supabaseId);
+  await renderSharedSessions();
+  await renderSavedSessions();
+  alert('Session published!');
+}
+
+async function renderSavedSessions() {
+  const el = document.getElementById('savedSessionsList');
+  el.innerHTML = `<div class="empty-state">Loading...</div>`;
+
+  // Try Supabase first
+  let sessions = await sb.getSessions(false);
+
+  // Filter to this role's own sessions if coach
+  if (currentRole === 'coach') {
+    sessions = sessions.filter(s => s.created_by === 'coach');
+  }
+
+  if (!sessions || sessions.length === 0) {
+    // Fallback to localStorage
+    const local = loadFromStorage('sc_sessions') || [];
+    if (local.length === 0) {
+      el.innerHTML = `<div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>`;
+      return;
+    }
+    sessions = local.map(s => ({ session_data: s, id: null }));
+  }
+
+  el.innerHTML = sessions.map((row, i) => {
+    const s = row.session_data || row;
+    const isPublished = row.published;
+    return `
+    <div class="saved-session-card" onclick="loadSavedSession(${i}, ${JSON.stringify(JSON.stringify(row))})">
+      <div>
+        <div class="saved-session-name">${s.name || 'Untitled Session'}</div>
+        <div class="saved-session-meta">${s.blocks ? s.blocks.length : 0} block${(s.blocks||[]).length !== 1 ? 's' : ''}${s.game ? ' · 🎮 '+s.game.name : ''} · ${s.savedAt ? new Date(s.savedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${currentRole === 'admin' && row.id && !isPublished
+          ? `<button class="btn btn-sky" style="padding:5px 9px;font-size:10px;" onclick="event.stopPropagation();publishExistingSession('${row.id}',this)">SHARE</button>`
+          : isPublished ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--purple);letter-spacing:1px;">SHARED</span>` : ''}
+        <div style="color:var(--silver);font-size:18px;">›</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function renderSharedSessions() {
+  const section = document.getElementById('sharedSessionsSection');
+  const el = document.getElementById('sharedSessionsList');
+
+  const published = await sb.getSessions(true);
+
+  if (!published || published.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = 'block';
+  el.innerHTML = published.map((row, i) => {
+    const s = row.session_data;
+    return `
+    <div class="saved-session-card" style="border-color:var(--purple);" onclick="loadSharedSession(${i}, ${JSON.stringify(JSON.stringify(row))})">
+      <div>
+        <div class="saved-session-name">${s.name || 'Session'}</div>
+        <div class="saved-session-meta">${(s.blocks||[]).length} block${(s.blocks||[]).length !== 1 ? 's' : ''}${s.game ? ' · 🎮 '+s.game.name : ''} · ${row.created_at ? new Date(row.created_at).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
+      </div>
+      <div style="color:var(--purple);font-size:18px;">›</div>
+    </div>`;
+  }).join('');
+}
+
+function loadSavedSession(idx, rowJson) {
+  try {
+    const row = JSON.parse(rowJson);
+    session = JSON.parse(JSON.stringify(row.session_data || row));
+  } catch(e) {
+    const saved = loadFromStorage('sc_sessions') || [];
+    session = JSON.parse(JSON.stringify(saved[idx]));
+  }
+  renderPreview();
+  showScreen('preview');
+}
+
+function loadSharedSession(idx, rowJson) {
+  try {
+    const row = JSON.parse(rowJson);
+    session = JSON.parse(JSON.stringify(row.session_data || row));
+  } catch(e) {}
+  renderPreview();
+  showScreen('preview');
+}
+
+// ============================================================
+// COACHES MODAL
+// ============================================================
+function openCoachesModal() {
+  renderCoachesList();
+  document.getElementById('adminCoachControls').style.display = currentRole === 'admin' ? 'block' : 'none';
+  document.getElementById('coachesModal').classList.add('active');
+}
+
+async function renderCoachesList() {
+  const el = document.getElementById('coachesList');
+  el.innerHTML = `<div style="color:var(--silver);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:10px 0;">Loading...</div>`;
+
+  const coaches = await sb.getCoaches();
+
+  // Always show supervisor at top
+  const rows = [
+    { name: 'Supervisor', role: 'Head Coach / Supervisor', id: null, isSupervisor: true },
+    ...(coaches || []).map(c => ({ name: c.name, role: c.role, id: c.id, isSupervisor: false }))
+  ];
+
+  el.innerHTML = rows.map(c => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--white);">${c.name}</div>
+        <div style="font-size:11px;color:var(--silver);margin-top:2px;">${c.role}</div>
+      </div>
+      ${currentRole === 'admin' && !c.isSupervisor
+        ? `<button class="btn" style="padding:5px 9px;font-size:10px;color:#ff5555;border-color:#ff5555;" onclick="removeCoach('${c.id}',this)">✕</button>`
+        : `<div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;">${c.isSupervisor ? 'SUPERVISOR' : 'COACH'}</div>`}
+    </div>`).join('');
+}
+
+async function saveNewCoach() {
+  const name = document.getElementById('newCoachName').value.trim();
+  const role = document.getElementById('newCoachRole').value.trim() || 'Junior Coach';
+  if (!name) return;
+  await sb.insertCoach(name, role);
+  document.getElementById('newCoachName').value = '';
+  document.getElementById('newCoachRole').value = '';
+  document.getElementById('addCoachForm').style.display = 'none';
+  renderCoachesList();
+}
+
+async function removeCoach(id, btnEl) {
+  btnEl.textContent = '...';
+  await sb.deleteCoach(id);
+  renderCoachesList();
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+function startBuild() {
+  session = { warmup: null, blocks: [], game: null, name: '' };
+  renderWarmupList();
+  showScreen('warmup');
 }
 
 // ============================================================
@@ -1301,7 +1742,9 @@ function loadFromStorage(key) {
 const now = new Date();
 document.getElementById('headerDate').textContent =
   now.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }).toUpperCase();
-renderSavedSessions();
+
+// Focus PIN input when auth modal is shown
+document.getElementById('authPinInput').focus();
 </script>
 </body>
 </html>
