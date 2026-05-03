@@ -707,7 +707,7 @@ body {
 
   <div class="divider"></div>
   <div style="display:flex;gap:8px;">
-    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('home')">← BACK</button>
+    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('home')">✕ CANCEL</button>
     <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="goToStrokes()">NEXT: STROKES →</button>
   </div>
 </div>
@@ -1582,33 +1582,35 @@ async function publishExistingSession(supabaseId, btnEl) {
   alert('Session published!');
 }
 
+// In-memory session caches to avoid JSON-in-onclick issues
+let cachedSavedSessions = [];
+let cachedSharedSessions = [];
+
 async function renderSavedSessions() {
   const el = document.getElementById('savedSessionsList');
   el.innerHTML = `<div class="empty-state">Loading...</div>`;
 
-  // Try Supabase first
   let sessions = await sb.getSessions(false);
-
-  // Filter to this role's own sessions if coach
   if (currentRole === 'coach') {
     sessions = sessions.filter(s => s.created_by === 'coach');
   }
 
   if (!sessions || sessions.length === 0) {
-    // Fallback to localStorage
     const local = loadFromStorage('sc_sessions') || [];
     if (local.length === 0) {
       el.innerHTML = `<div class="empty-state">No sessions saved yet.<br>Build your first session above.</div>`;
       return;
     }
-    sessions = local.map(s => ({ session_data: s, id: null }));
+    cachedSavedSessions = local.map(s => ({ session_data: s, id: null, published: false }));
+  } else {
+    cachedSavedSessions = sessions;
   }
 
-  el.innerHTML = sessions.map((row, i) => {
+  el.innerHTML = cachedSavedSessions.map((row, i) => {
     const s = row.session_data || row;
     const isPublished = row.published;
     return `
-    <div class="saved-session-card" onclick="loadSavedSession(${i}, ${JSON.stringify(JSON.stringify(row))})">
+    <div class="saved-session-card" onclick="loadSavedSession(${i})">
       <div>
         <div class="saved-session-name">${s.name || 'Untitled Session'}</div>
         <div class="saved-session-meta">${s.blocks ? s.blocks.length : 0} block${(s.blocks||[]).length !== 1 ? 's' : ''}${s.game ? ' · 🎮 '+s.game.name : ''} · ${s.savedAt ? new Date(s.savedAt).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
@@ -1633,11 +1635,13 @@ async function renderSharedSessions() {
     section.style.display = 'none';
     return;
   }
+
+  cachedSharedSessions = published;
   section.style.display = 'block';
-  el.innerHTML = published.map((row, i) => {
+  el.innerHTML = cachedSharedSessions.map((row, i) => {
     const s = row.session_data;
     return `
-    <div class="saved-session-card" style="border-color:var(--purple);" onclick="loadSharedSession(${i}, ${JSON.stringify(JSON.stringify(row))})">
+    <div class="saved-session-card" style="border-color:var(--purple);" onclick="loadSharedSession(${i})">
       <div>
         <div class="saved-session-name">${s.name || 'Session'}</div>
         <div class="saved-session-meta">${(s.blocks||[]).length} block${(s.blocks||[]).length !== 1 ? 's' : ''}${s.game ? ' · 🎮 '+s.game.name : ''} · ${row.created_at ? new Date(row.created_at).toLocaleDateString('en-AU',{day:'numeric',month:'short'}) : ''}</div>
@@ -1647,23 +1651,18 @@ async function renderSharedSessions() {
   }).join('');
 }
 
-function loadSavedSession(idx, rowJson) {
-  try {
-    const row = JSON.parse(rowJson);
-    session = JSON.parse(JSON.stringify(row.session_data || row));
-  } catch(e) {
-    const saved = loadFromStorage('sc_sessions') || [];
-    session = JSON.parse(JSON.stringify(saved[idx]));
-  }
+function loadSavedSession(idx) {
+  const row = cachedSavedSessions[idx];
+  if (!row) return;
+  session = JSON.parse(JSON.stringify(row.session_data || row));
   renderPreview();
   showScreen('preview');
 }
 
-function loadSharedSession(idx, rowJson) {
-  try {
-    const row = JSON.parse(rowJson);
-    session = JSON.parse(JSON.stringify(row.session_data || row));
-  } catch(e) {}
+function loadSharedSession(idx) {
+  const row = cachedSharedSessions[idx];
+  if (!row) return;
+  session = JSON.parse(JSON.stringify(row.session_data || row));
   renderPreview();
   showScreen('preview');
 }
@@ -1725,6 +1724,11 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   window.scrollTo(0,0);
+  // Re-render home screen lists when returning to home
+  if (id === 'home' && currentRole) {
+    renderSavedSessions();
+    renderSharedSessions();
+  }
 }
 
 function closeModal(id) {
