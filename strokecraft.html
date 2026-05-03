@@ -812,10 +812,7 @@ body {
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;" id="previewDate"></div>
   </div>
   <div id="previewContent"></div>
-  <div style="display:flex;gap:8px;margin-top:6px;">
-    <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('games')">← EDIT</button>
-    <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="openSaveModal()">SAVE SESSION ✓</button>
-  </div>
+  <div style="display:flex;gap:8px;margin-top:6px;" id="previewActions"></div>
 </div>
 
 <!-- DRILL INFO MODAL -->
@@ -906,10 +903,26 @@ body {
   <div class="modal">
     <div class="modal-title">NAME THIS SESSION</div>
     <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:16px;">PICK THE DATE IT WILL BE RUN</div>
-    <input type="date" id="sessionDateInput"
-      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:18px;letter-spacing:1px;padding:14px;border-radius:10px;margin-bottom:16px;outline:none;">
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:6px;">PREVIEW</div>
-    <div id="sessionDatePreview" style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;color:var(--white);margin-bottom:20px;"></div>
+
+    <!-- Calendar -->
+    <div style="background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:16px;">
+      <!-- Month nav -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <button onclick="calNav(-1)" style="background:none;border:1px solid var(--border2);color:var(--silver2);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;">‹</button>
+        <div id="calMonthLabel" style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--white);"></div>
+        <button onclick="calNav(1)" style="background:none;border:1px solid var(--border2);color:var(--silver2);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;">›</button>
+      </div>
+      <!-- Day headers -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+        ${['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => `<div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--silver);padding:4px 0;">${d}</div>`).join('')}
+      </div>
+      <!-- Day grid -->
+      <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+    </div>
+
+    <!-- Selected date display -->
+    <div id="sessionDatePreview" style="font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--white);text-align:center;margin-bottom:16px;">— SELECT A DATE —</div>
+
     <button class="btn btn-pink btn-full" onclick="confirmSaveSession()">SAVE SESSION ✓</button>
     <button class="btn btn-full" style="margin-top:8px;" onclick="closeModal('sessionDateModal')">CANCEL</button>
   </div>
@@ -1442,11 +1455,15 @@ function showDrillInfo(stroke, drillName) {
 // ============================================================
 // PREVIEW
 // ============================================================
+// 'build' = coming from build flow, 'view' = viewing saved/shared session
+let previewMode = 'build';
+
 function goToPreview() {
   if (session.blocks.length === 0) {
     alert('Add at least one stroke block before previewing.');
     return;
   }
+  previewMode = 'build';
   renderPreview();
   showScreen('preview');
 }
@@ -1455,6 +1472,18 @@ function renderPreview() {
   const wu = WARMUP_OPTIONS[session.warmup];
   const now = new Date();
   document.getElementById('previewDate').textContent = now.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+
+  // Set action buttons based on mode
+  const actions = document.getElementById('previewActions');
+  if (previewMode === 'build') {
+    actions.innerHTML = `
+      <button class="btn btn-full" style="margin-top:0;flex:1;" onclick="showScreen('games')">← EDIT</button>
+      <button class="btn btn-pink btn-full" style="margin-top:0;flex:2;" onclick="openSaveModal()">SAVE SESSION ✓</button>`;
+  } else {
+    // Viewing a saved/shared session
+    actions.innerHTML = `
+      <button class="btn btn-full" style="margin-top:0;" onclick="showScreen('home')">← BACK</button>`;
+  }
   let html = '';
   if (wu) {
     const wuIdx = session.warmup;
@@ -1515,27 +1544,69 @@ function renderPreview() {
 // ============================================================
 // SAVE / LOAD SESSIONS
 // ============================================================
+// ============================================================
+// CALENDAR PICKER
+// ============================================================
+let calYear, calMonth, calSelectedDate;
+
 function openSaveModal() {
-  // Default date picker to today
   const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, '0');
-  const dd = String(today.getDate()).padStart(2, '0');
-  const input = document.getElementById('sessionDateInput');
-  input.value = `${yyyy}-${mm}-${dd}`;
-  updateDatePreview();
-  input.addEventListener('input', updateDatePreview);
+  calYear = today.getFullYear();
+  calMonth = today.getMonth();
+  calSelectedDate = null;
+  document.getElementById('sessionDatePreview').textContent = '— SELECT A DATE —';
+  document.getElementById('sessionDatePreview').style.color = 'var(--silver)';
+  renderCalendar();
   document.getElementById('sessionDateModal').classList.add('active');
 }
 
-function updateDatePreview() {
-  const val = document.getElementById('sessionDateInput').value;
-  if (!val) { document.getElementById('sessionDatePreview').textContent = '—'; return; }
-  const d = new Date(val + 'T00:00:00');
-  const name = d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
-  // Format: "Thu 8 May"
-  const parts = name.split(' ');
-  document.getElementById('sessionDatePreview').textContent = name;
+function calNav(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const monthNames = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+  document.getElementById('calMonthLabel').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  let html = '';
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div></div>`;
+  }
+  // Day cells
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+    const isSelected = calSelectedDate === dateStr;
+
+    let style = `text-align:center;padding:7px 2px;border-radius:8px;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;transition:all 0.1s;`;
+    if (isSelected) {
+      style += `background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;`;
+    } else if (isToday) {
+      style += `border:1px solid var(--purple);color:var(--purple);`;
+    } else {
+      style += `color:var(--silver2);`;
+    }
+
+    html += `<div style="${style}" onclick="selectCalDate('${dateStr}',${d})">${d}</div>`;
+  }
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function selectCalDate(dateStr, day) {
+  calSelectedDate = dateStr;
+  const d = new Date(dateStr + 'T00:00:00');
+  const formatted = d.toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+  document.getElementById('sessionDatePreview').textContent = formatted;
+  document.getElementById('sessionDatePreview').style.color = 'var(--white)';
+  renderCalendar();
 }
 
 function formatSessionName(dateVal) {
@@ -1545,7 +1616,11 @@ function formatSessionName(dateVal) {
 }
 
 async function confirmSaveSession() {
-  const dateVal = document.getElementById('sessionDateInput').value;
+  if (!calSelectedDate) {
+    alert('Please select a date first.');
+    return;
+  }
+  const dateVal = calSelectedDate;
   closeModal('sessionDateModal');
 
   const name = formatSessionName(dateVal);
@@ -1554,12 +1629,10 @@ async function confirmSaveSession() {
   session.sessionDate = dateVal;
   session.savedBy = currentRole;
 
-  // Save to localStorage as backup
   const localSaved = loadFromStorage('sc_sessions') || [];
   localSaved.unshift(JSON.parse(JSON.stringify(session)));
   saveToStorage('sc_sessions', localSaved);
 
-  // Save to Supabase
   const result = await sb.insertSession(session, false);
   renderSavedSessions();
 
@@ -1655,6 +1728,7 @@ function loadSavedSession(idx) {
   const row = cachedSavedSessions[idx];
   if (!row) return;
   session = JSON.parse(JSON.stringify(row.session_data || row));
+  previewMode = 'view';
   renderPreview();
   showScreen('preview');
 }
@@ -1663,6 +1737,7 @@ function loadSharedSession(idx) {
   const row = cachedSharedSessions[idx];
   if (!row) return;
   session = JSON.parse(JSON.stringify(row.session_data || row));
+  previewMode = 'view';
   renderPreview();
   showScreen('preview');
 }
