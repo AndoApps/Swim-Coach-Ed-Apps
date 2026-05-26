@@ -683,7 +683,7 @@ body {
     <div class="logo-icon">🏊</div>
     <div>
       <div class="logo-text">STROKECRAFT</div>
-      <div class="logo-v">V2.0 — JUNIOR SQUAD</div>
+      <div class="logo-v" id="headerSubtitle">SWIM SESSION BUILDER</div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
@@ -692,12 +692,68 @@ body {
   </div>
 </div>
 
-<!-- HOME SCREEN -->
-<div class="screen active" id="screen-home">
+<!-- MODE SELECT SCREEN -->
+<div class="screen" id="screen-mode">
   <div class="home-hero">
     <div class="home-title">STROKECRAFT</div>
-    <div class="home-sub">Junior Squad Session Builder</div>
-    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:8px;"></div>
+    <div class="home-sub">Choose your mode</div>
+    <div id="modeUserBadge" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-20px;margin-bottom:8px;"></div>
+  </div>
+
+  <!-- Junior tile -->
+  <div id="modeTileJunior" onclick="selectMode('junior')"
+    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;transition:border-color 0.2s;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏊</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Junior</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Drill-based session builder for junior squads</div>
+      </div>
+      <div style="color:var(--pink);font-size:22px;">›</div>
+    </div>
+  </div>
+
+  <!-- Masters tile -->
+  <div id="modeTileMasters" onclick="selectMode('masters')"
+    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;transition:border-color 0.2s;opacity:1;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div id="mastersTileIcon" style="width:52px;height:52px;background:linear-gradient(135deg,var(--sky),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏅</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--sky),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Masters</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;" id="mastersSubtitle">Technique-focused sessions for masters swimmers</div>
+      </div>
+      <div id="mastersChevron" style="color:var(--sky);font-size:22px;">›</div>
+    </div>
+  </div>
+
+  <!-- Elite / SSA tile -->
+  <div id="modeTileElite"
+    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;opacity:0.4;pointer-events:none;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#ffb400,#ff6b00);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">⚡</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,#ffb400,#ff6b00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">SSA — Swim Set Architect</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Advanced AI session architecture · Elite tier</div>
+      </div>
+      <div style="color:#ffb400;font-size:14px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">🔒 ELITE</div>
+    </div>
+  </div>
+
+  <!-- Sign out -->
+  <div style="text-align:center;margin-top:20px;">
+    <span onclick="signOut()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">Sign out</span>
+  </div>
+</div>
+
+<!-- HOME SCREEN -->
+<div class="screen" id="screen-home">
+  <div class="home-hero">
+    <div class="home-title">STROKECRAFT</div>
+    <div class="home-sub" id="homeModeSub">Junior Squad Session Builder</div>
+    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:4px;"></div>
+    <div style="margin-bottom:8px;">
+      <span onclick="showScreen('mode')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">⇄ change mode</span>
+    </div>
   </div>
 
   <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
@@ -1129,33 +1185,91 @@ async function verifyPassword(password, storedHash) {
 }
 
 function onAuthSuccess() {
-  const ri = document.getElementById('roleIndicator');
   const tier = currentUser.tier;
+
+  // Set role indicator
+  const ri = document.getElementById('roleIndicator');
   if (tier === 'elite') {
-    ri.textContent = '★ ELITE';
-    ri.style.background = 'rgba(224,64,251,0.15)';
-    ri.style.color = 'var(--pink)';
-    ri.style.border = '1px solid var(--pink)';
+    ri.textContent = '★ ELITE'; ri.style.background = 'rgba(224,64,251,0.15)'; ri.style.color = 'var(--pink)'; ri.style.border = '1px solid var(--pink)';
   } else if (tier === 'pro_plus') {
-    ri.textContent = '◆ PRO+';
-    ri.style.background = 'rgba(124,77,255,0.15)';
-    ri.style.color = 'var(--purple)';
-    ri.style.border = '1px solid var(--purple)';
+    ri.textContent = '◆ PRO+'; ri.style.background = 'rgba(124,77,255,0.15)'; ri.style.color = 'var(--purple)'; ri.style.border = '1px solid var(--purple)';
   } else if (tier === 'pro') {
-    ri.textContent = '● PRO';
-    ri.style.background = 'rgba(64,196,255,0.15)';
-    ri.style.color = 'var(--sky)';
-    ri.style.border = '1px solid var(--sky)';
+    ri.textContent = '● PRO'; ri.style.background = 'rgba(64,196,255,0.15)'; ri.style.color = 'var(--sky)'; ri.style.border = '1px solid var(--sky)';
   } else {
-    ri.textContent = '○ FREE';
-    ri.style.background = 'rgba(119,119,170,0.15)';
-    ri.style.color = 'var(--silver)';
-    ri.style.border = '1px solid var(--silver)';
+    ri.textContent = '○ FREE'; ri.style.background = 'rgba(119,119,170,0.15)'; ri.style.color = 'var(--silver)'; ri.style.border = '1px solid var(--silver)';
   }
   ri.style.display = 'inline-block';
   document.getElementById('coachesBtn').style.display = 'none';
+
+  // Set mode badge on mode select screen
+  const mb = document.getElementById('modeUserBadge');
+  mb.textContent = ri.textContent;
+  mb.style.background = ri.style.background;
+  mb.style.color = ri.style.color;
+  mb.style.border = ri.style.border;
+  mb.style.display = 'inline-block';
+
+  // Configure tiles based on tier
+  const hasMasters = tier === 'pro_plus' || tier === 'elite';
+  const hasElite = tier === 'elite';
+
+  // Masters tile
+  const mastersTile = document.getElementById('modeTileMasters');
+  if (!hasMasters) {
+    mastersTile.style.opacity = '0.4';
+    mastersTile.style.pointerEvents = 'none';
+    mastersTile.style.cursor = 'default';
+    document.getElementById('mastersSubtitle').textContent = 'Upgrade to Pro+ to unlock Masters mode';
+    document.getElementById('mastersChevron').textContent = '🔒 PRO+';
+    document.getElementById('mastersChevron').style.fontSize = '11px';
+    document.getElementById('mastersChevron').style.fontFamily = "'Barlow Condensed', sans-serif";
+    document.getElementById('mastersChevron').style.letterSpacing = '1px';
+    document.getElementById('mastersChevron').style.color = 'var(--silver)';
+  }
+
+  // Elite tile
+  if (hasElite) {
+    const eliteTile = document.getElementById('modeTileElite');
+    eliteTile.style.opacity = '1';
+    eliteTile.style.pointerEvents = 'auto';
+    eliteTile.style.cursor = 'pointer';
+    eliteTile.onclick = () => selectMode('elite');
+  }
+
+  // Go to mode select
+  showScreen('mode');
+}
+
+function selectMode(mode) {
+  currentUser.mode = mode;
+
+  // Update header subtitle and home screen subtitle
+  const modeLabels = {
+    junior: 'JUNIOR SQUAD',
+    masters: 'MASTERS',
+    elite: 'SSA — ELITE'
+  };
+  const homeSubs = {
+    junior: 'Junior Squad Session Builder',
+    masters: 'Masters Session Builder',
+    elite: 'Swim Set Architect'
+  };
+  document.getElementById('headerSubtitle').textContent = modeLabels[mode] || 'SWIM SESSION BUILDER';
+  document.getElementById('homeModeSub').textContent = homeSubs[mode] || 'Session Builder';
+
+  showScreen('home');
   renderSavedSessions();
   renderSharedSessions();
+}
+
+function signOut() {
+  currentUser = null;
+  currentRole = 'coach';
+  document.getElementById('authModal').classList.add('active');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+  clearAuthMessages();
+  switchAuthTab('login');
 }
 
 // ============================================================
