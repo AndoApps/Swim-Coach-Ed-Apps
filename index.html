@@ -683,7 +683,7 @@ body {
     <div class="logo-icon">🏊</div>
     <div>
       <div class="logo-text">STROKECRAFT</div>
-      <div class="logo-v">V2.0 — JUNIOR SQUAD</div>
+      <div class="logo-v" id="headerSubtitle">SWIM SESSION BUILDER</div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
@@ -692,12 +692,64 @@ body {
   </div>
 </div>
 
+<!-- MODE SELECT SCREEN -->
+<div class="screen" id="screen-mode">
+  <div class="home-hero">
+    <div class="home-title">STROKECRAFT</div>
+    <div class="home-sub">Choose your mode</div>
+    <div id="modeUserBadge" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-20px;margin-bottom:8px;"></div>
+  </div>
+
+  <div id="modeTileJunior" onclick="selectMode('junior')"
+    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏊</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Junior</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Drill-based session builder for junior squads</div>
+      </div>
+      <div style="color:var(--pink);font-size:22px;">›</div>
+    </div>
+  </div>
+
+  <div id="modeTileMasters"
+    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--sky),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏅</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--sky),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Masters</div>
+        <div id="mastersSubtitle" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Technique-focused sessions for masters swimmers</div>
+      </div>
+      <div id="mastersChevron" style="color:var(--sky);font-size:22px;">›</div>
+    </div>
+  </div>
+
+  <div id="modeTileElite"
+    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#ffb400,#ff6b00);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">⚡</div>
+      <div style="flex:1;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,#ffb400,#ff6b00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">SSA — Swim Set Architect</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Advanced AI session architecture · Elite tier</div>
+      </div>
+      <div id="eliteChevron" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--silver);">🔒 ELITE</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:20px;">
+    <span onclick="signOut()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">Sign out</span>
+  </div>
+</div>
+
 <!-- HOME SCREEN -->
 <div class="screen" id="screen-home">
   <div class="home-hero">
     <div class="home-title">STROKECRAFT</div>
-    <div class="home-sub">Junior Squad Session Builder</div>
-    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:8px;"></div>
+    <div class="home-sub" id="homeModeSub">Junior Squad Session Builder</div>
+    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:4px;"></div>
+    <div style="margin-bottom:8px;">
+      <span onclick="showScreen('mode')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">⇄ change mode</span>
+    </div>
   </div>
 
   <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
