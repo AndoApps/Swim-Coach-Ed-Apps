@@ -1133,6 +1133,28 @@ body {
 </div>
 
 
+<!-- POOL LENGTH MODAL -->
+<div class="modal-overlay" id="poolLengthModal">
+  <div class="modal" style="margin-top:100px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:8px;">🏊</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--white);">POOL LENGTH</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;margin-top:4px;">Choose your pool size</div>
+    </div>
+    <div style="display:flex;gap:12px;margin-bottom:16px;">
+      <div onclick="selectPoolLength(25)" id="pool25btn" style="flex:1;background:var(--card2);border:2px solid var(--border2);border-radius:14px;padding:24px 12px;text-align:center;cursor:pointer;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">25</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:2px;margin-top:4px;">SHORT COURSE</div>
+      </div>
+      <div onclick="selectPoolLength(50)" id="pool50btn" style="flex:1;background:var(--card2);border:2px solid var(--border2);border-radius:14px;padding:24px 12px;text-align:center;cursor:pointer;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:48px;letter-spacing:2px;background:linear-gradient(90deg,var(--sky),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">50</div>
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:2px;margin-top:4px;">LONG COURSE</div>
+      </div>
+    </div>
+    <button class="btn btn-full" onclick="closeModal('poolLengthModal');showScreen('home')">CANCEL</button>
+  </div>
+</div>
+
 <!-- UPSELL MODAL -->
 <div class="modal-overlay" id="upsellModal">
   <div class="modal" style="margin-top:60px;">
@@ -1674,6 +1696,10 @@ function renderHomeButtons() {
 // ============================================================
 // AI SESSION GENERATOR
 // ============================================================
+let currentPoolLength = 25;
+let currentAiMode = 'junior';
+let currentAiSession = null;
+
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function pickN(arr, n) {
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -1681,21 +1707,32 @@ function pickN(arr, n) {
 }
 
 function startAiGenerate() {
+  currentAiMode = currentUser ? currentUser.mode : (document.getElementById('homeModeSub').textContent.toLowerCase().includes('masters') ? 'masters' : 'junior');
   showScreen('aigenerate');
+  document.getElementById('aiGenerateLoading').style.display = 'none';
+  document.getElementById('aiGenerateResult').style.display = 'none';
+  openPoolLengthModal();
+}
+
+function openPoolLengthModal() {
+  document.getElementById('pool25btn').style.borderColor = 'var(--border2)';
+  document.getElementById('pool50btn').style.borderColor = 'var(--border2)';
+  document.getElementById('poolLengthModal').classList.add('active');
+}
+
+function selectPoolLength(len) {
+  currentPoolLength = len;
+  document.getElementById('pool25btn').style.borderColor = len === 25 ? 'var(--pink)' : 'var(--border2)';
+  document.getElementById('pool50btn').style.borderColor = len === 50 ? 'var(--sky)' : 'var(--border2)';
+  closeModal('poolLengthModal');
   generateNewSession();
 }
 
 function generateNewSession() {
-  const mode = currentUser ? currentUser.mode : (document.getElementById('homeModeSub').textContent.toLowerCase().includes('masters') ? 'masters' : 'junior');
   document.getElementById('aiGenerateLoading').style.display = 'block';
   document.getElementById('aiGenerateResult').style.display = 'none';
 
-  const messages = [
-    'Picking your warmup...',
-    'Selecting drills...',
-    'Building the set...',
-    'Finishing touches...'
-  ];
+  const messages = ['Picking your warmup...', 'Selecting drills...', 'Building the set...', 'Finishing touches...'];
   let i = 0;
   const interval = setInterval(() => {
     document.getElementById('aiLoadingMsg').textContent = messages[i % messages.length];
@@ -1704,10 +1741,15 @@ function generateNewSession() {
 
   setTimeout(() => {
     clearInterval(interval);
-    const session = mode === 'masters' ? generateMastersSession() : generateJuniorSession();
-    renderAiSession(session, mode);
-    document.getElementById('aiGenerateLoading').style.display = 'none';
-    document.getElementById('aiGenerateResult').style.display = 'block';
+    try {
+      currentAiSession = currentAiMode === 'masters' ? generateMastersSession() : generateJuniorSession();
+      renderAiSession(currentAiSession, currentAiMode);
+      document.getElementById('aiGenerateLoading').style.display = 'none';
+      document.getElementById('aiGenerateResult').style.display = 'block';
+    } catch(e) {
+      console.error('Generate error:', e);
+      document.getElementById('aiLoadingMsg').textContent = 'Something went wrong — tap Generate Another to retry.';
+    }
   }, 2400);
 }
 
@@ -1870,10 +1912,16 @@ function renderAiSession(data, mode) {
       <div class="ai-block-item" style="font-size:12px;color:var(--silver);">${data.warmup.desc}</div>
     </div>`;
 
-    // Stroke blocks
-    data.blocks.forEach(block => {
+    // Stroke blocks with reorder arrows
+    data.blocks.forEach((block, idx) => {
       html += `<div class="ai-block" style="border-color:${block.color}22;">
-        <div class="ai-block-title" style="color:${block.color};">◆ ${block.name.toUpperCase()} DRILLS</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div class="ai-block-title" style="color:${block.color};margin-bottom:0;">◆ ${block.name.toUpperCase()} DRILLS</div>
+          <div style="display:flex;gap:4px;">
+            ${idx > 0 ? `<button onclick="moveBlock(${idx},-1)" style="background:none;border:1px solid var(--border2);color:var(--silver);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:12px;">↑</button>` : '<div style="width:26px;"></div>'}
+            ${idx < data.blocks.length - 1 ? `<button onclick="moveBlock(${idx},1)" style="background:none;border:1px solid var(--border2);color:var(--silver);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:12px;">↓</button>` : '<div style="width:26px;"></div>'}
+          </div>
+        </div>
         ${block.drills.map(d => `
           <div class="ai-block-item">
             <strong>${d.name}</strong>
@@ -1903,7 +1951,7 @@ function renderAiSession(data, mode) {
       <div class="ai-block-title" style="color:var(--sky);">🏊 WARM UP · ~${data.warmup.total}m</div>
       <div class="ai-block-item"><strong>${data.warmup.swim}m Freestyle</strong> — easy, focus on stroke length</div>
       ${data.warmup.drills.map(d => `
-        <div class="ai-block-item"><strong>6 x 25m ${d.name}</strong>
+        <div class="ai-block-item"><strong>6 x 50 ${d.name}</strong>
           <div style="font-size:12px;color:var(--silver);margin-top:2px;">${d.cue}</div>
         </div>`).join('')}
       <div class="ai-block-item"><strong>${data.warmup.interval.reps} x ${data.warmup.interval.dist}m Freestyle @ ${data.warmup.interval.rest}</strong>
@@ -1931,6 +1979,15 @@ function renderAiSession(data, mode) {
     html += `<div class="ai-total">TOTAL ~${data.total}M</div>`;
     contentEl.innerHTML = html;
   }
+}
+
+function moveBlock(idx, dir) {
+  if (!currentAiSession || currentAiSession.type !== 'junior') return;
+  const blocks = currentAiSession.blocks;
+  const newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= blocks.length) return;
+  [blocks[idx], blocks[newIdx]] = [blocks[newIdx], blocks[idx]];
+  renderAiSession(currentAiSession, 'junior');
 }
 
 // ============================================================
