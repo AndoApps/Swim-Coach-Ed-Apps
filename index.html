@@ -734,6 +734,7 @@ body {
   <div style="display:flex;align-items:center;gap:10px;">
     <div id="headerDate" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;"></div>
     <button class="btn" style="padding:6px 10px;font-size:11px;" onclick="showUpsell('coaches')" id="coachesBtn">👥</button>
+    <button class="btn" style="padding:6px 10px;font-size:11px;" onclick="openFeedbackModal()" title="Send feedback">💬</button>
   </div>
 </div>
 
@@ -1135,6 +1136,27 @@ body {
 </div>
 
 
+<!-- FEEDBACK MODAL -->
+<div class="modal-overlay" id="feedbackModal">
+  <div class="modal" style="margin-top:60px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:8px;">💬</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--white);">SEND FEEDBACK</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;margin-top:4px;">Help us improve StrokeCraft</div>
+    </div>
+    <div id="feedbackError" style="display:none;background:#3a1a1a;border:1px solid #ff5555;border-radius:8px;padding:10px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#ff5555;letter-spacing:1px;text-align:center;"></div>
+    <div id="feedbackSuccess" style="display:none;background:#1a3a1a;border:1px solid #55ff88;border-radius:8px;padding:10px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#55ff88;letter-spacing:1px;text-align:center;"></div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">YOUR NAME / EMAIL <span style="font-weight:400;">(optional)</span></div>
+    <input type="text" id="feedbackFrom" placeholder="e.g. Jane — jane@swimclub.com"
+      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:10px;border-radius:10px;margin-bottom:12px;outline:none;">
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">YOUR FEEDBACK</div>
+    <textarea id="feedbackText" placeholder="Tell us what's working, what's not, or what you'd love to see..."
+      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:10px;border-radius:10px;margin-bottom:16px;outline:none;height:120px;resize:none;"></textarea>
+    <button class="btn btn-pink btn-full" onclick="submitFeedback()" id="feedbackBtn" style="padding:14px;">SEND FEEDBACK →</button>
+    <button class="btn btn-full" onclick="closeModal('feedbackModal')" style="margin-top:8px;">← BACK</button>
+  </div>
+</div>
+
 <!-- POOL LENGTH MODAL -->
 <div class="modal-overlay" id="poolLengthModal">
   <div class="modal" style="margin-top:100px;">
@@ -1341,25 +1363,24 @@ function showUpsell(type) {
   const features = document.getElementById('upsellFeatures');
   const options = document.getElementById('upsellOptions');
 
+  const cancelLink = `<div style="text-align:center;margin-top:10px;"><a href="https://billing.stripe.com/p/login/test_cancel" target="_blank" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;">Cancel subscription</a></div>`;
+
   if (type === 'masters') {
     icon.textContent = '🏅';
     title.textContent = 'UNLOCK MASTERS MODE';
-    subtitle.textContent = 'Free AI sessions for both modes — upgrade to build and save your own';
+    subtitle.textContent = 'AI sessions are free — upgrade to build and save your own';
     features.innerHTML = `
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--sky);margin-bottom:10px;">WHAT YOU GET WITH PRO+</div>
       <div style="font-size:13px;color:var(--silver2);line-height:2;">
         ✓ Full Build Session — Junior &amp; Masters<br>
         ✓ Save and store unlimited sessions<br>
-        ✓ Access across all your devices<br>
-        ✓ Cancel anytime
+        ✓ Access across all your devices
       </div>`;
     options.innerHTML = `
-      <a href="https://buy.stripe.com/test_proplus" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">
-        UPGRADE TO PRO+ — $10/mo
-      </a>
-      <a href="https://buy.stripe.com/test_pro" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--sky);border-color:var(--sky);padding:14px;">
-        PRO (Junior only) — $5/mo
-      </a>`;
+      <a href="https://buy.stripe.com/test_proplus" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">UPGRADE TO PRO+ — $10/mo</a>
+      <a href="https://buy.stripe.com/test_pro" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--sky);border-color:var(--sky);padding:14px;">PRO (Junior only) — $5/mo</a>
+      ${cancelLink}`;
+
   } else if (type === 'elite') {
     icon.textContent = '⚡';
     title.textContent = 'UNLOCK SSA ELITE';
@@ -1373,28 +1394,25 @@ function showUpsell(type) {
         ✓ Periodisation and training load tools
       </div>`;
     options.innerHTML = `
-      <a href="https://buy.stripe.com/test_elite" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#ffb400,#ff6b00);color:var(--white);border:none;padding:14px;">
-        UPGRADE TO ELITE — $20/mo
-      </a>`;
+      <a href="https://buy.stripe.com/test_elite" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#ffb400,#ff6b00);color:var(--white);border:none;padding:14px;">UPGRADE TO ELITE — $20/mo</a>
+      ${cancelLink}`;
+
   } else if (type === 'customise') {
     icon.textContent = '✏️';
     title.textContent = 'CUSTOMISE THIS SESSION';
-    subtitle.textContent = 'Create a free account to build and save your own sessions';
+    subtitle.textContent = 'Upgrade to build and save your own sessions';
     features.innerHTML = `
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--pink);margin-bottom:10px;">UPGRADE TO PRO</div>
       <div style="font-size:13px;color:var(--silver2);line-height:2;">
         ✓ Full Build Session access<br>
         ✓ Save and store unlimited sessions<br>
-        ✓ Edit and customise any session<br>
-        ✓ Cancel anytime
+        ✓ Edit and customise any session
       </div>`;
     options.innerHTML = `
-      <a href="https://buy.stripe.com/test_pro" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">
-        UPGRADE TO PRO — $5/mo
-      </a>
-      <a href="https://buy.stripe.com/test_proplus" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--purple);border-color:var(--purple);padding:14px;">
-        PRO+ (Junior &amp; Masters) — $10/mo
-      </a>`;
+      <a href="https://buy.stripe.com/test_pro" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">UPGRADE TO PRO — $5/mo</a>
+      <a href="https://buy.stripe.com/test_proplus" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--purple);border-color:var(--purple);padding:14px;">PRO+ (Junior &amp; Masters) — $10/mo</a>
+      ${cancelLink}`;
+
   } else if (type === 'save') {
     icon.textContent = '💾';
     title.textContent = 'SAVE THIS SESSION';
@@ -1408,15 +1426,80 @@ function showUpsell(type) {
         ✓ Upgrade anytime to build your own
       </div>`;
     options.innerHTML = `
-      <button onclick="closeModal('upsellModal');openAuthModal();" class="btn btn-full" style="background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;padding:14px;margin-bottom:8px;">
-        CREATE FREE ACCOUNT
-      </button>
-      <button onclick="closeModal('upsellModal');openAuthModal();" class="btn btn-full" style="color:var(--sky);border-color:var(--sky);padding:14px;">
-        SIGN IN
-      </button>`;
+      <button onclick="closeModal('upsellModal');openAuthModal();" class="btn btn-full" style="background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;padding:14px;margin-bottom:8px;">CREATE FREE ACCOUNT</button>
+      <button onclick="closeModal('upsellModal');openAuthModal();" class="btn btn-full" style="color:var(--sky);border-color:var(--sky);padding:14px;">SIGN IN</button>`;
+
+  } else if (type === 'coaches') {
+    icon.textContent = '👥';
+    title.textContent = 'ADD COACHES';
+    subtitle.textContent = 'Manage a team of coaches with a Pro account';
+    features.innerHTML = `
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--purple);margin-bottom:10px;">WHAT YOU GET WITH PRO</div>
+      <div style="font-size:13px;color:var(--silver2);line-height:2;">
+        ✓ Add and manage multiple coaches<br>
+        ✓ Share sessions across your squad<br>
+        ✓ Full Build Session access<br>
+        ✓ Save unlimited sessions
+      </div>`;
+    options.innerHTML = `
+      <a href="https://buy.stripe.com/test_proplus" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">UPGRADE TO PRO+ — $10/mo</a>
+      <a href="https://buy.stripe.com/test_pro" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--sky);border-color:var(--sky);padding:14px;">PRO (Junior only) — $5/mo</a>
+      ${cancelLink}`;
   }
 
   document.getElementById('upsellModal').classList.add('active');
+}
+
+function openFeedbackModal() {
+  document.getElementById('feedbackFrom').value = currentUser ? currentUser.email : '';
+  document.getElementById('feedbackText').value = '';
+  document.getElementById('feedbackError').style.display = 'none';
+  document.getElementById('feedbackSuccess').style.display = 'none';
+  document.getElementById('feedbackBtn').textContent = 'SEND FEEDBACK →';
+  document.getElementById('feedbackBtn').disabled = false;
+  document.getElementById('feedbackModal').classList.add('active');
+}
+
+async function submitFeedback() {
+  const from = document.getElementById('feedbackFrom').value.trim();
+  const text = document.getElementById('feedbackText').value.trim();
+  if (!text) {
+    document.getElementById('feedbackError').textContent = 'Please enter your feedback.';
+    document.getElementById('feedbackError').style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('feedbackBtn');
+  btn.textContent = 'SENDING...';
+  btn.disabled = true;
+
+  try {
+    await fetch(`${SUPABASE_URL}/rest/v1/sc_feedback`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        from_user: from || 'anonymous',
+        message: text,
+        mode: currentUser ? currentUser.mode : 'guest',
+        tier: currentUser ? currentUser.tier : 'free'
+      })
+    });
+    document.getElementById('feedbackSuccess').textContent = 'Thanks! Your feedback has been sent.';
+    document.getElementById('feedbackSuccess').style.display = 'block';
+    document.getElementById('feedbackError').style.display = 'none';
+    document.getElementById('feedbackText').value = '';
+    btn.textContent = 'SENT ✓';
+    setTimeout(() => closeModal('feedbackModal'), 2000);
+  } catch(e) {
+    document.getElementById('feedbackError').textContent = 'Something went wrong. Please try again.';
+    document.getElementById('feedbackError').style.display = 'block';
+    btn.textContent = 'SEND FEEDBACK →';
+    btn.disabled = false;
+  }
 }
 
 function openAuthModal() {
