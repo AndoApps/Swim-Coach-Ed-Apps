@@ -674,7 +674,50 @@ body {
   border-radius: 8px;
   margin-bottom: 10px;
 }
-</style>
+
+/* AI GENERATE */
+@keyframes aiPulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.ai-dot {
+  width: 10px; height: 10px;
+  background: var(--pink);
+  border-radius: 50%;
+  animation: aiPulse 1s infinite;
+}
+
+.ai-block {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.ai-block-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.ai-block-item {
+  font-size: 13px;
+  color: var(--silver2);
+  line-height: 1.8;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ai-block-item:last-child { border-bottom: none; }
+.ai-block-item strong { color: var(--white); font-weight: 600; }
+.ai-total {
+  text-align: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: var(--pink);
+  margin: 10px 0 6px;
+}</style>
 </head>
 <body>
 
@@ -753,7 +796,9 @@ body {
     </div>
   </div>
 
-  <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
+  <div id="homeButtons">
+    <!-- Filled by renderHomeButtons() -->
+  </div>
 
   <div id="sharedSessionsSection" style="display:none;">
     <div class="home-sessions-title">📢 SHARED BY SUPERVISOR</div>
@@ -771,6 +816,34 @@ body {
       <span id="archiveChevron" style="font-size:14px;color:var(--silver);">▶</span>
     </div>
     <div id="archiveSessionsList" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- AI GENERATE SCREEN -->
+<div class="screen" id="screen-aigenerate">
+  <button class="top-back-btn" onclick="showScreen('home')">← HOME</button>
+
+  <div id="aiGenerateLoading" style="display:none;text-align:center;padding:60px 20px;">
+    <div style="font-size:48px;margin-bottom:16px;">✨</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--white);margin-bottom:8px;">GENERATING SESSION</div>
+    <div id="aiLoadingMsg" style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--silver);letter-spacing:1px;">Building your session...</div>
+    <div style="margin-top:24px;display:flex;justify-content:center;gap:6px;">
+      <div class="ai-dot"></div><div class="ai-dot" style="animation-delay:0.2s"></div><div class="ai-dot" style="animation-delay:0.4s"></div>
+    </div>
+  </div>
+
+  <div id="aiGenerateResult" style="display:none;">
+    <div class="session-card-header">
+      <div class="session-card-title" id="aiSessionTitle">AI GENERATED SESSION</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;" id="aiSessionMeta"></div>
+    </div>
+    <div id="aiSessionContent"></div>
+
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-pink btn-full" onclick="generateNewSession()" style="padding:14px;">✨ GENERATE ANOTHER</button>
+      <button class="btn btn-full" onclick="showUpsell('save')" style="padding:14px;color:var(--sky);border-color:var(--sky);">💾 SAVE THIS SESSION</button>
+      <button class="btn btn-full" onclick="showUpsell('customise')" style="padding:14px;color:var(--purple);border-color:var(--purple);">✏️ CUSTOMISE SESSION → PRO</button>
+    </div>
   </div>
 </div>
 
@@ -1335,6 +1408,7 @@ function selectMode(mode) {
   const homeSubs = { junior: 'Junior Squad Session Builder', masters: 'Masters Session Builder', elite: 'Swim Set Architect' };
   document.getElementById('headerSubtitle').textContent = modeLabels[mode] || 'SWIM SESSION BUILDER';
   document.getElementById('homeModeSub').textContent = homeSubs[mode] || 'Session Builder';
+  renderHomeButtons();
   showScreen('home');
   renderSavedSessions();
   renderSharedSessions();
@@ -1576,6 +1650,269 @@ const GAMES = [
   { name:'Shark and Minnows', cat:'team', icon:'🦈', cue:'One shark, everyone else swims across. Tagged swimmers become sharks.', desc:'Classic pool game. One swimmer is the shark and starts in the middle of the pool. All others (minnows) must swim from one end to the other without being tagged. Tagged swimmers join the shark. Last minnow standing wins and is the next shark.', how:'Sharks must tag with an open hand — no grabbing. Minnows can go in any lane. Go wide is a valid strategy. Works best in a 25m pool. Usually lasts 3–5 minutes per round.' },
   { name:'Freeze Frame', cat:'team', icon:'❄️', cue:'Coach calls "freeze" — everyone stops exactly where they are. Last team all frozen loses a point.', desc:'Both teams swim continuously. At random intervals the coach calls "FREEZE!" — every swimmer must stop dead in the water immediately. Any swimmer still moving loses a point for their team. Tests reaction time and body control.', how:'Call freeze at unpredictable intervals — sometimes very quickly, sometimes after a long pause. Be consistent in judging movement. Run for 5 minutes, team with fewest penalty points wins.' },
 ];
+
+// ============================================================
+// HOME BUTTONS — dynamic based on tier
+// ============================================================
+function renderHomeButtons() {
+  const el = document.getElementById('homeButtons');
+  const tier = currentUser ? currentUser.tier : 'free';
+  const isPaid = tier === 'pro' || tier === 'pro_plus' || tier === 'elite';
+
+  if (isPaid) {
+    el.innerHTML = `
+      <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
+      <button class="btn btn-full" onclick="startAiGenerate()" style="margin-top:8px;color:var(--purple);border-color:var(--purple);padding:12px;">✨ AI GENERATE SESSION</button>`;
+  } else {
+    el.innerHTML = `
+      <button class="build-btn" style="background:linear-gradient(135deg,var(--purple),var(--pink));" onclick="startAiGenerate()">✨ AI GENERATE SESSION</button>
+      <button class="btn btn-full" onclick="showUpsell('customise')" style="margin-top:8px;color:var(--silver);border-color:var(--border2);padding:12px;">+ BUILD YOUR OWN → PRO</button>`;
+  }
+}
+
+// ============================================================
+// AI SESSION GENERATOR
+// ============================================================
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function pickN(arr, n) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
+
+function startAiGenerate() {
+  showScreen('aigenerate');
+  generateNewSession();
+}
+
+function generateNewSession() {
+  const mode = currentUser ? currentUser.mode : (document.getElementById('homeModeSub').textContent.toLowerCase().includes('masters') ? 'masters' : 'junior');
+  document.getElementById('aiGenerateLoading').style.display = 'block';
+  document.getElementById('aiGenerateResult').style.display = 'none';
+
+  const messages = [
+    'Picking your warmup...',
+    'Selecting drills...',
+    'Building the set...',
+    'Finishing touches...'
+  ];
+  let i = 0;
+  const interval = setInterval(() => {
+    document.getElementById('aiLoadingMsg').textContent = messages[i % messages.length];
+    i++;
+  }, 600);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    const session = mode === 'masters' ? generateMastersSession() : generateJuniorSession();
+    renderAiSession(session, mode);
+    document.getElementById('aiGenerateLoading').style.display = 'none';
+    document.getElementById('aiGenerateResult').style.display = 'block';
+  }, 2400);
+}
+
+function generateJuniorSession() {
+  const strokes = ['free', 'back', 'breast', 'fly'];
+  const strokeNames = { free: 'Freestyle', back: 'Backstroke', breast: 'Breaststroke', fly: 'Butterfly' };
+  const strokeColors = { free: 'var(--pink)', back: 'var(--sky)', breast: 'var(--purple)', fly: '#ff6b9d' };
+
+  // Pick warmup
+  const warmup = pick(WARMUP_OPTIONS);
+
+  // Pick drills for each stroke
+  const blocks = strokes.map(stroke => {
+    const foundational = DRILLS[stroke].filter(d => d.cat === 'foundational');
+    const technical = DRILLS[stroke].filter(d => d.cat === 'technical');
+    const application = DRILLS[stroke].filter(d => d.cat === 'application');
+    return {
+      stroke,
+      name: strokeNames[stroke],
+      color: strokeColors[stroke],
+      drills: [
+        ...pickN(foundational, 1),
+        ...pickN(technical, 2),
+        ...pickN(application, 1)
+      ]
+    };
+  });
+
+  // Pick game
+  const game = pick(GAMES);
+
+  // Estimate distance
+  const warmupDist = parseInt(warmup.dist) || 200;
+  const drillDist = strokes.length * 4 * 50; // 4 drills x 50m per stroke
+  const gameDist = 100;
+  const total = warmupDist + drillDist + gameDist;
+
+  return { warmup, blocks, game, total, type: 'junior' };
+}
+
+function generateMastersSession() {
+  // Masters-eligible freestyle drills (no Kick on Board, no Fast 25s/50s)
+  const mastersExclude = ['Kick on Board', 'Fast 25s', 'Fast 50s'];
+  const mastersDrills = DRILLS.free.filter(d => !mastersExclude.includes(d.name));
+  const foundational = mastersDrills.filter(d => d.cat === 'foundational');
+  const technical = mastersDrills.filter(d => d.cat === 'technical');
+  const application = mastersDrills.filter(d => d.cat === 'application');
+
+  // Warmup block (~400-500m)
+  const warmupSwim = pick([300, 400]);
+  const warmupDrills = pickN([...foundational, ...technical], 2);
+  const warmupInterval = pick([
+    { reps: 6, dist: 50, rest: '10s RI' },
+    { reps: 4, dist: 75, rest: '15s RI' },
+    { reps: 8, dist: 25, rest: '10s RI' }
+  ]);
+  const warmupTotal = warmupSwim + (warmupDrills.length * 50) + (warmupInterval.reps * warmupInterval.dist);
+
+  // Main set (~1200-1800m) — 2-3 blocks
+  const mainSets = generateMastersMainSet();
+
+  // Swim down (~300-400m)
+  const swimDownSwim = pick([200, 300]);
+  const swimDownExtra = pick([
+    `4 x 50 easy kick (no board)`,
+    `4 x 25 ${pick([...application]).name}`,
+    `200 choice easy`,
+    `6 x 25 social pace`
+  ]);
+  const swimDownTotal = swimDownSwim + 200;
+
+  const total = warmupTotal + mainSets.total + swimDownTotal;
+
+  return {
+    type: 'masters',
+    warmup: { swim: warmupSwim, drills: warmupDrills, interval: warmupInterval, total: warmupTotal },
+    mainSets,
+    swimDown: { swim: swimDownSwim, extra: swimDownExtra, total: swimDownTotal },
+    total
+  };
+}
+
+function generateMastersMainSet() {
+  const setTemplates = [
+    // Descend sets
+    () => {
+      const reps = pick([3, 4]);
+      const dist = pick([100, 150, 200]);
+      return { label: `${reps} x ${dist}m Freestyle — descend 1-${reps}`, dist: reps * dist, note: 'Each rep faster than the last. 15-20s RI.' };
+    },
+    // EZ/Hard alternating
+    () => {
+      const reps = pick([6, 8]);
+      const dist = pick([50, 75, 100]);
+      return { label: `${reps} x ${dist}m — 1 Easy, 1 Hard`, dist: reps * dist, note: '10-15s RI. Alternate effort each rep.' };
+    },
+    // Time cycle
+    () => {
+      const reps = pick([4, 5, 6]);
+      const dist = pick([100, 200]);
+      const cycle = dist === 100 ? pick(['1:45', '2:00', '2:15']) : pick(['3:30', '3:45', '4:00']);
+      return { label: `${reps} x ${dist}m Freestyle @ ${cycle}`, dist: reps * dist, note: 'Send off time. Aim for consistent splits.' };
+    },
+    // Form stroke option
+    () => {
+      const reps = pick([4, 6]);
+      const dist = 50;
+      const stroke = pick(['Backstroke', 'Breaststroke', 'Choice']);
+      return { label: `${reps} x ${dist}m ${stroke}`, dist: reps * dist, note: '15s RI. Focus on technique, not speed.' };
+    },
+    // Negative split
+    () => {
+      const reps = pick([3, 4]);
+      const dist = pick([100, 200]);
+      return { label: `${reps} x ${dist}m — negative split`, dist: reps * dist, note: 'Second half faster than first. 20s RI.' };
+    }
+  ];
+
+  // Pick 2-3 blocks for main set
+  const numBlocks = pick([2, 3]);
+  const chosen = pickN(setTemplates, numBlocks).map(fn => fn());
+  const total = chosen.reduce((sum, s) => sum + s.dist, 0);
+
+  return { blocks: chosen, total };
+}
+
+function renderAiSession(data, mode) {
+  const titleEl = document.getElementById('aiSessionTitle');
+  const metaEl = document.getElementById('aiSessionMeta');
+  const contentEl = document.getElementById('aiSessionContent');
+
+  titleEl.textContent = mode === 'masters' ? 'MASTERS SESSION' : 'JUNIOR SESSION';
+  metaEl.textContent = `AI Generated · ~${data.total}m`;
+
+  if (mode === 'junior') {
+    let html = '';
+
+    // Warmup
+    html += `<div class="ai-block">
+      <div class="ai-block-title" style="color:var(--sky);">🏊 WARM UP · ${data.warmup.dist}</div>
+      <div class="ai-block-item"><strong>${data.warmup.name}</strong></div>
+      <div class="ai-block-item" style="font-size:12px;color:var(--silver);">${data.warmup.desc}</div>
+    </div>`;
+
+    // Stroke blocks
+    data.blocks.forEach(block => {
+      html += `<div class="ai-block" style="border-color:${block.color}22;">
+        <div class="ai-block-title" style="color:${block.color};">◆ ${block.name.toUpperCase()} DRILLS</div>
+        ${block.drills.map(d => `
+          <div class="ai-block-item">
+            <strong>${d.name}</strong>
+            <span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:1px;color:var(--silver);margin-left:6px;">${d.cat.toUpperCase()}</span>
+            <div style="font-size:12px;color:var(--silver);margin-top:2px;">${d.cue}</div>
+          </div>`).join('')}
+      </div>`;
+    });
+
+    // Game
+    html += `<div class="ai-block" style="border-color:var(--purple)22;">
+      <div class="ai-block-title" style="color:var(--purple);">🎮 FINISHER GAME</div>
+      <div class="ai-block-item"><strong>${data.game.icon} ${data.game.name}</strong>
+        <div style="font-size:12px;color:var(--silver);margin-top:2px;">${data.game.cue}</div>
+      </div>
+    </div>`;
+
+    html += `<div class="ai-total">TOTAL ~${data.total}M</div>`;
+    contentEl.innerHTML = html;
+
+  } else {
+    // Masters
+    let html = '';
+
+    // Warmup
+    html += `<div class="ai-block">
+      <div class="ai-block-title" style="color:var(--sky);">🏊 WARM UP · ~${data.warmup.total}m</div>
+      <div class="ai-block-item"><strong>${data.warmup.swim}m Freestyle</strong> — easy, focus on stroke length</div>
+      ${data.warmup.drills.map(d => `
+        <div class="ai-block-item"><strong>6 x 25m ${d.name}</strong>
+          <div style="font-size:12px;color:var(--silver);margin-top:2px;">${d.cue}</div>
+        </div>`).join('')}
+      <div class="ai-block-item"><strong>${data.warmup.interval.reps} x ${data.warmup.interval.dist}m Freestyle @ ${data.warmup.interval.rest}</strong>
+        <div style="font-size:12px;color:var(--silver);margin-top:2px;">Building effort — last 2 reps at moderate pace</div>
+      </div>
+    </div>`;
+
+    // Main set
+    html += `<div class="ai-block" style="border-color:var(--pink)22;">
+      <div class="ai-block-title" style="color:var(--pink);">⚡ MAIN SET · ~${data.mainSets.total}m</div>
+      ${data.mainSets.blocks.map(s => `
+        <div class="ai-block-item">
+          <strong>${s.label}</strong>
+          <div style="font-size:12px;color:var(--silver);margin-top:2px;">${s.note}</div>
+        </div>`).join('')}
+    </div>`;
+
+    // Swim down
+    html += `<div class="ai-block" style="border-color:var(--sky)22;">
+      <div class="ai-block-title" style="color:var(--sky);">🌊 SWIM DOWN · ~${data.swimDown.total}m</div>
+      <div class="ai-block-item"><strong>${data.swimDown.swim}m Freestyle</strong> — easy, social pace</div>
+      <div class="ai-block-item"><strong>${data.swimDown.extra}</strong></div>
+    </div>`;
+
+    html += `<div class="ai-total">TOTAL ~${data.total}M</div>`;
+    contentEl.innerHTML = html;
+  }
+}
 
 // ============================================================
 // WARMUP FUNCTIONS
