@@ -892,19 +892,62 @@ body {
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay active" id="authModal">
-  <div class="modal" style="margin-top:60px;">
-    <div style="text-align:center;margin-bottom:20px;">
+  <div class="modal" style="margin-top:40px;">
+    <div style="text-align:center;margin-bottom:24px;">
       <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:4px;background:linear-gradient(90deg,var(--pink),var(--purple),var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">STROKECRAFT</div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--silver);text-transform:uppercase;margin-top:4px;">Junior Squad Session Builder</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:3px;color:var(--silver);text-transform:uppercase;margin-top:4px;">Swim Session Builder</div>
     </div>
+
+    <!-- Tab toggle -->
+    <div style="display:flex;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:3px;margin-bottom:20px;">
+      <button id="tabLoginBtn" onclick="switchAuthTab('login')"
+        style="flex:1;padding:8px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);">
+        SIGN IN
+      </button>
+      <button id="tabRegisterBtn" onclick="switchAuthTab('register')"
+        style="flex:1;padding:8px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer;background:transparent;color:var(--silver);">
+        REGISTER
+      </button>
+    </div>
+
     <div id="authError" style="display:none;background:#3a1a1a;border:1px solid #ff5555;border-radius:8px;padding:10px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#ff5555;letter-spacing:1px;text-align:center;"></div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:8px;">ENTER YOUR CLUB PIN</div>
-    <input type="password" id="authPinInput" placeholder="• • • •" maxlength="4"
-      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:8px;text-align:center;padding:14px;border-radius:10px;margin-bottom:12px;outline:none;"
-      oninput="this.value=this.value.replace(/[^0-9]/g,'')"
-      onkeydown="if(event.key==='Enter')submitAuth()">
-    <button class="btn btn-pink btn-full" onclick="submitAuth()">ENTER →</button>
-    <div style="text-align:center;margin-top:16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;">Contact your supervisor for your club PIN</div>
+    <div id="authSuccess" style="display:none;background:#1a3a1a;border:1px solid #55ff88;border-radius:8px;padding:10px;margin-bottom:12px;font-family:'Barlow Condensed',sans-serif;font-size:12px;color:#55ff88;letter-spacing:1px;text-align:center;"></div>
+
+    <!-- SIGN IN FORM -->
+    <div id="loginForm">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">EMAIL</div>
+      <input type="email" id="loginEmail" placeholder="your@email.com"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:15px;padding:12px;border-radius:10px;margin-bottom:12px;outline:none;"
+        onkeydown="if(event.key==='Enter')submitLogin()">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">PASSWORD</div>
+      <input type="password" id="loginPassword" placeholder="••••••••"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:15px;padding:12px;border-radius:10px;margin-bottom:16px;outline:none;"
+        onkeydown="if(event.key==='Enter')submitLogin()">
+      <button class="btn btn-pink btn-full" onclick="submitLogin()" id="loginBtn">SIGN IN →</button>
+      <div style="text-align:center;margin-top:14px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;">No account? </span>
+        <span onclick="switchAuthTab('register')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--pink);letter-spacing:1px;cursor:pointer;text-decoration:underline;">Register free</span>
+      </div>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">EMAIL</div>
+      <input type="email" id="regEmail" placeholder="your@email.com"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:15px;padding:12px;border-radius:10px;margin-bottom:12px;outline:none;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">PASSWORD</div>
+      <input type="password" id="regPassword" placeholder="••••••••"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:15px;padding:12px;border-radius:10px;margin-bottom:12px;outline:none;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:6px;">CLUB NAME <span style="color:var(--silver);font-weight:400;">(optional)</span></div>
+      <input type="text" id="regClub" placeholder="e.g. Runaway Bay Swim Club"
+        style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:15px;padding:12px;border-radius:10px;margin-bottom:16px;outline:none;">
+      <button class="btn btn-pink btn-full" onclick="submitRegister()" id="registerBtn">CREATE ACCOUNT →</button>
+      <div style="text-align:center;margin-top:14px;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;">Already registered? </span>
+        <span onclick="switchAuthTab('login')" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--pink);letter-spacing:1px;cursor:pointer;text-decoration:underline;">Sign in</span>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -965,59 +1008,154 @@ body {
 
 <script>
 // ============================================================
-// AUTH
+// AUTH — EMAIL BASED
 // ============================================================
-const ADMIN_PIN = '0000';
-const CLUB_PIN  = '0001';
-const TEST_PIN  = '9999';
-let currentRole = null; // 'admin' | 'coach' | 'test'
-let currentClubId = 'runaway_bay';
+let currentUser = null; // { email, tier, mode, club_name }
+let currentRole = 'coach'; // kept for session card logic compatibility
 
-function submitAuth() {
-  const pin = document.getElementById('authPinInput').value.trim();
-  if (pin === ADMIN_PIN) {
-    currentRole = 'admin';
-    currentClubId = 'runaway_bay';
-  } else if (pin === CLUB_PIN) {
-    currentRole = 'coach';
-    currentClubId = 'runaway_bay';
-  } else if (pin === TEST_PIN) {
-    currentRole = 'test';
-    currentClubId = 'test_account';
-  } else {
-    const err = document.getElementById('authError');
-    err.textContent = 'Incorrect PIN — contact your supervisor';
-    err.style.display = 'block';
-    document.getElementById('authPinInput').value = '';
-    return;
+// Comped accounts (free Pro+ access)
+const COMPED_EMAILS = ['ed@runaway-bay.com', 'runawaybaySC@gmail.com'];
+
+function switchAuthTab(tab) {
+  const isLogin = tab === 'login';
+  document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+  document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+  document.getElementById('tabLoginBtn').style.background = isLogin ? 'linear-gradient(135deg,var(--purple),var(--pink))' : 'transparent';
+  document.getElementById('tabLoginBtn').style.color = isLogin ? 'var(--white)' : 'var(--silver)';
+  document.getElementById('tabRegisterBtn').style.background = isLogin ? 'transparent' : 'linear-gradient(135deg,var(--purple),var(--pink))';
+  document.getElementById('tabRegisterBtn').style.color = isLogin ? 'var(--silver)' : 'var(--white)';
+  clearAuthMessages();
+}
+
+function clearAuthMessages() {
+  document.getElementById('authError').style.display = 'none';
+  document.getElementById('authSuccess').style.display = 'none';
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('authSuccess').style.display = 'none';
+}
+
+function showAuthSuccess(msg) {
+  const el = document.getElementById('authSuccess');
+  el.textContent = msg;
+  el.style.display = 'block';
+  document.getElementById('authError').style.display = 'none';
+}
+
+async function submitLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'SIGNING IN...';
+  btn.disabled = true;
+  clearAuthMessages();
+
+  try {
+    const user = await sb.getUser(email);
+    if (!user) { showAuthError('No account found. Please register first.'); btn.textContent = 'SIGN IN →'; btn.disabled = false; return; }
+
+    // Simple password check via stored hash
+    const valid = await verifyPassword(password, user.password_hash);
+    if (!valid) { showAuthError('Incorrect password. Please try again.'); btn.textContent = 'SIGN IN →'; btn.disabled = false; return; }
+
+    // Check for comped access
+    let tier = user.tier;
+    if (COMPED_EMAILS.includes(email) && tier === 'free') tier = 'pro_plus';
+
+    currentUser = { email: user.email, tier, mode: user.mode, club_name: user.club_name };
+    closeModal('authModal');
+    onAuthSuccess();
+  } catch(e) {
+    showAuthError('Something went wrong. Please try again.');
+    btn.textContent = 'SIGN IN →';
+    btn.disabled = false;
   }
-  closeModal('authModal');
-  onAuthSuccess();
+}
+
+async function submitRegister() {
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const password = document.getElementById('regPassword').value;
+  const club = document.getElementById('regClub').value.trim();
+
+  if (!email || !password) { showAuthError('Please enter your email and password.'); return; }
+  if (password.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+
+  const btn = document.getElementById('registerBtn');
+  btn.textContent = 'CREATING...';
+  btn.disabled = true;
+  clearAuthMessages();
+
+  try {
+    const existing = await sb.getUser(email);
+    if (existing) { showAuthError('An account with this email already exists. Please sign in.'); btn.textContent = 'CREATE ACCOUNT →'; btn.disabled = false; return; }
+
+    const hash = await hashPassword(password);
+    let tier = 'free';
+    if (COMPED_EMAILS.includes(email)) tier = 'pro_plus';
+
+    await sb.createUser(email, hash, club, tier);
+    showAuthSuccess('Account created! Signing you in...');
+
+    currentUser = { email, tier, mode: null, club_name: club || null };
+    setTimeout(() => {
+      closeModal('authModal');
+      onAuthSuccess();
+    }, 1000);
+  } catch(e) {
+    showAuthError('Something went wrong. Please try again.');
+    btn.textContent = 'CREATE ACCOUNT →';
+    btn.disabled = false;
+  }
+}
+
+// Simple password hashing using Web Crypto API
+async function hashPassword(password) {
+  const enc = new TextEncoder();
+  const salt = 'strokecraft_salt_v1';
+  const data = enc.encode(password + salt);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function verifyPassword(password, storedHash) {
+  const hash = await hashPassword(password);
+  return hash === storedHash;
 }
 
 function onAuthSuccess() {
   const ri = document.getElementById('roleIndicator');
-  if (currentRole === 'admin') {
-    ri.textContent = '★ SUPERVISOR';
+  const tier = currentUser.tier;
+  if (tier === 'elite') {
+    ri.textContent = '★ ELITE';
     ri.style.background = 'rgba(224,64,251,0.15)';
     ri.style.color = 'var(--pink)';
     ri.style.border = '1px solid var(--pink)';
-  } else if (currentRole === 'test') {
-    ri.textContent = '⚙ TEST ACCOUNT';
-    ri.style.background = 'rgba(255,180,0,0.15)';
-    ri.style.color = '#ffb400';
-    ri.style.border = '1px solid #ffb400';
-  } else {
-    ri.textContent = '● COACH';
+  } else if (tier === 'pro_plus') {
+    ri.textContent = '◆ PRO+';
+    ri.style.background = 'rgba(124,77,255,0.15)';
+    ri.style.color = 'var(--purple)';
+    ri.style.border = '1px solid var(--purple)';
+  } else if (tier === 'pro') {
+    ri.textContent = '● PRO';
     ri.style.background = 'rgba(64,196,255,0.15)';
     ri.style.color = 'var(--sky)';
     ri.style.border = '1px solid var(--sky)';
+  } else {
+    ri.textContent = '○ FREE';
+    ri.style.background = 'rgba(119,119,170,0.15)';
+    ri.style.color = 'var(--silver)';
+    ri.style.border = '1px solid var(--silver)';
   }
   ri.style.display = 'inline-block';
-  // Only show coaches button for RB accounts
-  document.getElementById('coachesBtn').style.display = currentRole === 'admin' ? 'block' : 'none';
+  document.getElementById('coachesBtn').style.display = 'none';
   renderSavedSessions();
-  if (currentRole !== 'test') renderSharedSessions();
+  renderSharedSessions();
 }
 
 // ============================================================
@@ -1036,25 +1174,46 @@ const sb = {
     };
   },
 
+  async getUser(email) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_users?email=eq.${encodeURIComponent(email)}&limit=1`, { headers: this.headers });
+      const data = await r.json();
+      return data[0] || null;
+    } catch(e) { console.error('getUser:', e); return null; }
+  },
+
+  async createUser(email, passwordHash, clubName, tier) {
+    try {
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_users`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ email, password_hash: passwordHash, club_name: clubName || null, tier: tier || 'free' })
+      });
+      const data = await r.json();
+      return data[0] || null;
+    } catch(e) { console.error('createUser:', e); return null; }
+  },
+
   async getSessions(publishedOnly = false) {
     try {
-      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?club_id=eq.${currentClubId}&order=session_data->>sessionDate.asc,created_at.desc`;
-      if (publishedOnly) url += '&published=eq.true';
+      if (!currentUser) return [];
+      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?user_email=eq.${encodeURIComponent(currentUser.email)}&order=session_data->>sessionDate.asc,created_at.desc`;
+      if (publishedOnly) url += '&is_ai_generated=eq.false';
       const r = await fetch(url, { headers: this.headers });
       return await r.json();
     } catch(e) { console.error('getSessions:', e); return []; }
   },
 
-  async insertSession(sessionData, published = false) {
+  async insertSession(sessionData, isAiGenerated = false) {
     try {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions`, {
         method: 'POST',
         headers: this.headers,
         body: JSON.stringify({
-          club_id: currentClubId,
+          user_email: currentUser.email,
           session_data: sessionData,
-          published,
-          created_by: currentRole
+          mode: currentUser.mode || 'junior',
+          is_ai_generated: isAiGenerated
         })
       });
       const result = await r.json();
@@ -1062,38 +1221,17 @@ const sb = {
     } catch(e) { console.error('insertSession:', e); return null; }
   },
 
-  async publishSession(id) {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: this.headers,
-        body: JSON.stringify({ published: true })
-      });
-      return true;
-    } catch(e) { console.error('publishSession:', e); return false; }
-  },
-
   async deleteSession(id) {
     try {
-      const deleteHeaders = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Prefer': 'return=minimal'
-      };
       await fetch(`${SUPABASE_URL}/rest/v1/sc_sessions?id=eq.${id}`, {
         method: 'DELETE',
-        headers: deleteHeaders
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal' }
       });
       return true;
     } catch(e) { console.error('deleteSession:', e); return false; }
   },
 
-  async getCoaches() {
-    try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches?club_id=eq.${currentClubId}&order=created_at.asc`, { headers: this.headers });
-      return await r.json();
-    } catch(e) { console.error('getCoaches:', e); return []; }
-  },
+  async getCoaches() { return []; },
 
   async insertCoach(name, role) {
     try {
@@ -1714,22 +1852,13 @@ async function confirmSaveSession() {
   session.name = name;
   session.savedAt = new Date().toISOString();
   session.sessionDate = dateVal;
-  session.savedBy = currentRole;
 
   const localSaved = loadFromStorage('sc_sessions') || [];
   localSaved.unshift(JSON.parse(JSON.stringify(session)));
   saveToStorage('sc_sessions', localSaved);
 
-  const result = await sb.insertSession(session, false);
+  await sb.insertSession(session, false);
   renderSavedSessions();
-
-  if (currentRole === 'admin' && result) {
-    if (confirm(`Publish "${name}" to your coaches now?`)) {
-      await sb.publishSession(result.id);
-      await renderSharedSessions();
-      alert(`"${name}" is now live for your coaches.`);
-    }
-  }
   showScreen('home');
 }
 
@@ -1764,10 +1893,9 @@ function isUpcoming(row) {
 
 function buildSessionCard(row, idx, isShared, isArchived) {
   const s = row.session_data || row;
-  const isPublished = row.published;
-  const isOwned = currentRole === 'admin' || currentRole === 'test' || (currentRole === 'coach' && !isShared);
-  const canDelete = isOwned && row.id;
-  const canShare = currentRole === 'admin' && row.id && !isPublished && !isShared;
+  const isOwned = true;
+  const canDelete = row.id;
+  const canShare = false;
   const canTemplate = isArchived || isShared;
   const borderColor = isShared ? 'border-color:var(--purple);' : '';
 
@@ -1793,9 +1921,6 @@ async function renderSavedSessions() {
   if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">Loading...</div>`;
 
   let sessions = await sb.getSessions(false);
-  if (currentRole === 'coach') {
-    sessions = sessions.filter(s => s.created_by === 'coach');
-  }
 
   if (!sessions || sessions.length === 0) {
     if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
@@ -1960,8 +2085,8 @@ const now = new Date();
 document.getElementById('headerDate').textContent =
   now.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }).toUpperCase();
 
-// Focus PIN input when auth modal is shown
-document.getElementById('authPinInput').focus();
+// Focus email input on load
+document.getElementById('loginEmail').focus();
 </script>
 </body>
 </html>
