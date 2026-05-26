@@ -693,7 +693,7 @@ body {
 </div>
 
 <!-- HOME SCREEN -->
-<div class="screen active" id="screen-home">
+<div class="screen" id="screen-home">
   <div class="home-hero">
     <div class="home-title">STROKECRAFT</div>
     <div class="home-sub">Junior Squad Session Builder</div>
@@ -2164,9 +2164,9 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   window.scrollTo(0,0);
-  if (id === 'home' && currentRole) {
+  if (id === 'home' && currentUser) {
     renderSavedSessions();
-    if (currentRole !== 'test') renderSharedSessions();
+    renderSharedSessions();
   }
 }
 
