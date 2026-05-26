@@ -647,19 +647,21 @@ body {
 .border-fly { border-left: 3px solid var(--stroke-fly); }
 
 .top-back-btn {
-  background: none;
-  border: none;
-  color: var(--silver);
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  color: var(--silver2);
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
-  padding: 0 0 12px 0;
+  padding: 7px 14px;
+  border-radius: 20px;
   cursor: pointer;
-  display: block;
+  display: inline-block;
+  margin-bottom: 12px;
 }
-.top-back-btn:hover { color: var(--white); }
+.top-back-btn:hover { color: var(--white); border-color: var(--silver); }
 
 .divider { height: 1px; background: var(--border); margin: 14px 0; }
 
@@ -731,7 +733,7 @@ body {
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <div id="headerDate" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;"></div>
-    <button class="btn" style="padding:6px 10px;font-size:11px;" onclick="openCoachesModal()" id="coachesBtn" style="display:none;">👥</button>
+    <button class="btn" style="padding:6px 10px;font-size:11px;" onclick="showUpsell('coaches')" id="coachesBtn">👥</button>
   </div>
 </div>
 
@@ -761,7 +763,7 @@ body {
       <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--sky),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏅</div>
       <div style="flex:1;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--sky),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Masters</div>
-        <div id="mastersSubtitle" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Technique-focused sessions for masters swimmers</div>
+        <div id="mastersSubtitle" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Fitness-focused sessions for masters swimmers</div>
       </div>
       <div id="mastersChevron" style="color:var(--sky);font-size:22px;">›</div>
     </div>
@@ -792,7 +794,7 @@ body {
     <div class="home-sub" id="homeModeSub">Junior Squad Session Builder</div>
     <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:4px;"></div>
     <div style="margin-bottom:8px;">
-      <span onclick="showScreen('mode')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">⇄ change mode</span>
+      <button onclick="showScreen('mode')" style="background:linear-gradient(135deg,var(--purple),var(--pink));border:none;color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;padding:7px 16px;border-radius:20px;cursor:pointer;margin-bottom:8px;">⇄ CHANGE MODE</button>
     </div>
   </div>
 
@@ -1799,22 +1801,32 @@ function generateMastersSession() {
   const is50 = currentPoolLength === 50;
 
   // WARMUP — target 500-600m
+  // Max 8 x 50 drill total, max 4 of any one drill
   const warmupSwim = pick(is50 ? [300, 400] : [200, 300]);
-  const warmupDrills = pickN([...foundational, ...technical], 2); // 2 x 50 = 100m
+  const allWarmupDrills = [...foundational, ...technical];
+  // Pick 2 different drills, 4 reps each = 8 x 50 total
+  const drillPicks = pickN(allWarmupDrills, 2);
+  const warmupDrills = drillPicks.map(d => ({ ...d, reps: 4 }));
+  const warmupDrillDist = warmupDrills.reduce((sum, d) => sum + d.reps * 50, 0); // 400m
   const warmupInterval = is50
     ? pick([{ reps: 4, dist: 50, rest: '10s RI' }, { reps: 4, dist: 100, rest: '15s RI' }])
     : pick([{ reps: 6, dist: 50, rest: '10s RI' }, { reps: 4, dist: 50, rest: '15s RI' }]);
-  const warmupTotal = warmupSwim + (warmupDrills.length * 50) + (warmupInterval.reps * warmupInterval.dist);
+  const warmupTotal = warmupSwim + warmupDrillDist + (warmupInterval.reps * warmupInterval.dist);
 
-  // SWIM DOWN — target 300-400m
+  // SWIM DOWN — always includes kick + optional fins freestyle
   const swimDownSwim = pick(is50 ? [200, 300] : [150, 200]);
-  const appDrill = pick(application);
-  const swimDownExtra = pick([
-    '4 x 50 easy kick (no board)',
-    '4 x 50 ' + appDrill.name,
-    '6 x ' + (is50 ? '50' : '25') + ' social pace'
+  const kickSet = pick([
+    `4 x 50 kick (no board) — easy`,
+    `6 x 50 kick (no board) — social pace`,
+    `200 kick (no board) — easy`
   ]);
-  const swimDownExtraDist = is50 ? 200 : 100;
+  const finsOption = pick([
+    `4 x 50 Freestyle with fins — long and smooth`,
+    `200 Freestyle with fins — focus on stroke length`,
+    `4 x 50 ${pick(application).name} with fins`
+  ]);
+  const swimDownExtras = [kickSet, finsOption];
+  const swimDownExtraDist = is50 ? 400 : 200;
   const swimDownTotal = swimDownSwim + swimDownExtraDist;
 
   // MAIN SET — fill remaining to hit 2000-2400m total
@@ -1829,7 +1841,7 @@ function generateMastersSession() {
     poolLength: currentPoolLength,
     warmup: { swim: warmupSwim, drills: warmupDrills, interval: warmupInterval, total: warmupTotal },
     mainSets,
-    swimDown: { swim: swimDownSwim, extra: swimDownExtra, total: swimDownTotal },
+    swimDown: { swim: swimDownSwim, extras: swimDownExtras, total: swimDownTotal },
     total
   };
 }
@@ -1951,7 +1963,7 @@ function renderAiSession(data, mode) {
       <div class="ai-block-title" style="color:var(--sky);">🏊 WARM UP · ~${data.warmup.total}m</div>
       <div class="ai-block-item"><strong>${data.warmup.swim}m Freestyle</strong> — easy, focus on stroke length</div>
       ${data.warmup.drills.map(d => `
-        <div class="ai-block-item"><strong>6 x 50 ${d.name}</strong>
+        <div class="ai-block-item"><strong>${d.reps} x 50 ${d.name}</strong>
           <div style="font-size:12px;color:var(--silver);margin-top:2px;">${d.cue}</div>
         </div>`).join('')}
       <div class="ai-block-item"><strong>${data.warmup.interval.reps} x ${data.warmup.interval.dist}m Freestyle @ ${data.warmup.interval.rest}</strong>
@@ -1972,8 +1984,8 @@ function renderAiSession(data, mode) {
     // Swim down
     html += `<div class="ai-block" style="border-color:var(--sky)22;">
       <div class="ai-block-title" style="color:var(--sky);">🌊 SWIM DOWN · ~${data.swimDown.total}m</div>
-      <div class="ai-block-item"><strong>${data.swimDown.swim}m Freestyle</strong> — easy, social pace</div>
-      <div class="ai-block-item"><strong>${data.swimDown.extra}</strong></div>
+      <div class="ai-block-item"><strong>${data.swimDown.swim} Freestyle</strong> — easy, social pace</div>
+      ${data.swimDown.extras.map(e => `<div class="ai-block-item"><strong>${e}</strong></div>`).join('')}
     </div>`;
 
     html += `<div class="ai-total">TOTAL ~${data.total}M</div>`;
