@@ -683,7 +683,7 @@ body {
     <div class="logo-icon">🏊</div>
     <div>
       <div class="logo-text">STROKECRAFT</div>
-      <div class="logo-v" id="headerSubtitle">SWIM SESSION BUILDER</div>
+      <div class="logo-v">V2.0 — JUNIOR SQUAD</div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
@@ -692,68 +692,12 @@ body {
   </div>
 </div>
 
-<!-- MODE SELECT SCREEN -->
-<div class="screen" id="screen-mode">
-  <div class="home-hero">
-    <div class="home-title">STROKECRAFT</div>
-    <div class="home-sub">Choose your mode</div>
-    <div id="modeUserBadge" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-20px;margin-bottom:8px;"></div>
-  </div>
-
-  <!-- Junior tile -->
-  <div id="modeTileJunior" onclick="selectMode('junior')"
-    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;transition:border-color 0.2s;">
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div style="width:52px;height:52px;background:linear-gradient(135deg,var(--purple),var(--pink));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏊</div>
-      <div style="flex:1;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Junior</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Drill-based session builder for junior squads</div>
-      </div>
-      <div style="color:var(--pink);font-size:22px;">›</div>
-    </div>
-  </div>
-
-  <!-- Masters tile -->
-  <div id="modeTileMasters" onclick="selectMode('masters')"
-    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;transition:border-color 0.2s;opacity:1;">
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div id="mastersTileIcon" style="width:52px;height:52px;background:linear-gradient(135deg,var(--sky),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">🏅</div>
-      <div style="flex:1;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,var(--sky),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">StrokeCraft Masters</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;" id="mastersSubtitle">Technique-focused sessions for masters swimmers</div>
-      </div>
-      <div id="mastersChevron" style="color:var(--sky);font-size:22px;">›</div>
-    </div>
-  </div>
-
-  <!-- Elite / SSA tile -->
-  <div id="modeTileElite"
-    style="background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:24px 20px;margin-bottom:14px;cursor:pointer;opacity:0.4;pointer-events:none;">
-    <div style="display:flex;align-items:center;gap:16px;">
-      <div style="width:52px;height:52px;background:linear-gradient(135deg,#ffb400,#ff6b00);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;">⚡</div>
-      <div style="flex:1;">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,#ffb400,#ff6b00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">SSA — Swim Set Architect</div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver2);letter-spacing:1px;margin-top:2px;">Advanced AI session architecture · Elite tier</div>
-      </div>
-      <div style="color:#ffb400;font-size:14px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;">🔒 ELITE</div>
-    </div>
-  </div>
-
-  <!-- Sign out -->
-  <div style="text-align:center;margin-top:20px;">
-    <span onclick="signOut()" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">Sign out</span>
-  </div>
-</div>
-
 <!-- HOME SCREEN -->
-<div class="screen" id="screen-home">
+<div class="screen active" id="screen-home">
   <div class="home-hero">
     <div class="home-title">STROKECRAFT</div>
-    <div class="home-sub" id="homeModeSub">Junior Squad Session Builder</div>
-    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:4px;"></div>
-    <div style="margin-bottom:8px;">
-      <span onclick="showScreen('mode')" style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;cursor:pointer;text-decoration:underline;">⇄ change mode</span>
-    </div>
+    <div class="home-sub">Junior Squad Session Builder</div>
+    <div id="roleIndicator" style="display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 10px;border-radius:20px;margin-top:-24px;margin-bottom:8px;"></div>
   </div>
 
   <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
@@ -1062,6 +1006,23 @@ body {
 </div>
 
 
+<!-- UPSELL MODAL -->
+<div class="modal-overlay" id="upsellModal">
+  <div class="modal" style="margin-top:60px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div id="upsellIcon" style="font-size:40px;margin-bottom:10px;">🔒</div>
+      <div id="upsellTitle" style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;background:linear-gradient(90deg,var(--pink),var(--purple),var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">UPGRADE TO UNLOCK</div>
+      <div id="upsellSubtitle" style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;margin-top:6px;"></div>
+    </div>
+
+    <div id="upsellFeatures" style="background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:16px;"></div>
+
+    <div id="upsellOptions"></div>
+
+    <button class="btn btn-full" style="margin-top:8px;" onclick="closeModal('upsellModal')">MAYBE LATER</button>
+  </div>
+</div>
+
 <script>
 // ============================================================
 // AUTH — EMAIL BASED
@@ -1213,50 +1174,90 @@ function onAuthSuccess() {
   const hasMasters = tier === 'pro_plus' || tier === 'elite';
   const hasElite = tier === 'elite';
 
-  // Masters tile
+  // Masters tile — locked or unlocked
   const mastersTile = document.getElementById('modeTileMasters');
   if (!hasMasters) {
-    mastersTile.style.opacity = '0.4';
-    mastersTile.style.pointerEvents = 'none';
-    mastersTile.style.cursor = 'default';
+    mastersTile.style.opacity = '0.5';
+    mastersTile.style.cursor = 'pointer';
+    mastersTile.onclick = () => showUpsell('masters');
     document.getElementById('mastersSubtitle').textContent = 'Upgrade to Pro+ to unlock Masters mode';
-    document.getElementById('mastersChevron').textContent = '🔒 PRO+';
-    document.getElementById('mastersChevron').style.fontSize = '11px';
-    document.getElementById('mastersChevron').style.fontFamily = "'Barlow Condensed', sans-serif";
-    document.getElementById('mastersChevron').style.letterSpacing = '1px';
-    document.getElementById('mastersChevron').style.color = 'var(--silver)';
+    document.getElementById('mastersChevron').innerHTML = '<span style="font-family:\'Barlow Condensed\',sans-serif;font-size:11px;letter-spacing:1px;color:var(--silver);">🔒 PRO+</span>';
+  } else {
+    mastersTile.style.opacity = '1';
+    mastersTile.style.cursor = 'pointer';
+    mastersTile.onclick = () => selectMode('masters');
+    document.getElementById('mastersSubtitle').textContent = 'Technique-focused sessions for masters swimmers';
+    document.getElementById('mastersChevron').innerHTML = '<span style="color:var(--sky);font-size:22px;">›</span>';
   }
 
-  // Elite tile
-  if (hasElite) {
-    const eliteTile = document.getElementById('modeTileElite');
+  // Elite tile — locked or unlocked
+  const eliteTile = document.getElementById('modeTileElite');
+  eliteTile.style.pointerEvents = 'auto';
+  eliteTile.style.cursor = 'pointer';
+  if (!hasElite) {
+    eliteTile.style.opacity = '0.5';
+    eliteTile.onclick = () => showUpsell('elite');
+  } else {
     eliteTile.style.opacity = '1';
-    eliteTile.style.pointerEvents = 'auto';
-    eliteTile.style.cursor = 'pointer';
     eliteTile.onclick = () => selectMode('elite');
   }
 
-  // Go to mode select
   showScreen('mode');
+}
+
+function showUpsell(type) {
+  const icon = document.getElementById('upsellIcon');
+  const title = document.getElementById('upsellTitle');
+  const subtitle = document.getElementById('upsellSubtitle');
+  const features = document.getElementById('upsellFeatures');
+  const options = document.getElementById('upsellOptions');
+
+  if (type === 'masters') {
+    icon.textContent = '🏅';
+    title.textContent = 'UNLOCK MASTERS MODE';
+    subtitle.textContent = 'StrokeCraft Masters requires Pro+ or above';
+    features.innerHTML = `
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--sky);margin-bottom:10px;">WHAT YOU GET WITH PRO+</div>
+      <div style="font-size:13px;color:var(--silver2);line-height:2;">
+        ✓ StrokeCraft Junior — full build access<br>
+        ✓ StrokeCraft Masters — technique-focused sessions<br>
+        ✓ Save and store unlimited sessions<br>
+        ✓ Access across all your devices
+      </div>`;
+    options.innerHTML = `
+      <a href="https://buy.stripe.com/test_proplus" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">
+        UPGRADE TO PRO+ — $10/mo
+      </a>
+      <a href="https://buy.stripe.com/test_pro" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--sky);border-color:var(--sky);padding:14px;">
+        PRO (Junior only) — $5/mo
+      </a>`;
+  } else if (type === 'elite') {
+    icon.textContent = '⚡';
+    title.textContent = 'UNLOCK SSA ELITE';
+    subtitle.textContent = 'Swim Set Architect requires the Elite tier';
+    features.innerHTML = `
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:#ffb400;margin-bottom:10px;">WHAT YOU GET WITH ELITE</div>
+      <div style="font-size:13px;color:var(--silver2);line-height:2;">
+        ✓ Everything in Pro+<br>
+        ✓ SSA — Swim Set Architect (advanced AI)<br>
+        ✓ AI-generated session programming<br>
+        ✓ Periodisation and training load tools
+      </div>`;
+    options.innerHTML = `
+      <a href="https://buy.stripe.com/test_elite" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,#ffb400,#ff6b00);color:var(--white);border:none;padding:14px;">
+        UPGRADE TO ELITE — $20/mo
+      </a>`;
+  }
+
+  document.getElementById('upsellModal').classList.add('active');
 }
 
 function selectMode(mode) {
   currentUser.mode = mode;
-
-  // Update header subtitle and home screen subtitle
-  const modeLabels = {
-    junior: 'JUNIOR SQUAD',
-    masters: 'MASTERS',
-    elite: 'SSA — ELITE'
-  };
-  const homeSubs = {
-    junior: 'Junior Squad Session Builder',
-    masters: 'Masters Session Builder',
-    elite: 'Swim Set Architect'
-  };
+  const modeLabels = { junior: 'JUNIOR SQUAD', masters: 'MASTERS', elite: 'SSA — ELITE' };
+  const homeSubs = { junior: 'Junior Squad Session Builder', masters: 'Masters Session Builder', elite: 'Swim Set Architect' };
   document.getElementById('headerSubtitle').textContent = modeLabels[mode] || 'SWIM SESSION BUILDER';
   document.getElementById('homeModeSub').textContent = homeSubs[mode] || 'Session Builder';
-
   showScreen('home');
   renderSavedSessions();
   renderSharedSessions();
