@@ -1081,30 +1081,6 @@ body {
   </div>
 </div>
 
-<!-- COACHES MODAL -->
-<div class="modal-overlay" id="coachesModal">
-  <div class="modal">
-    <div class="modal-title">COACH ACCOUNTS</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;margin-bottom:16px;">RUNAWAY BAY SQUAD</div>
-    <div id="coachesList" style="margin-bottom:16px;"></div>
-    <div id="addCoachForm" style="display:none;background:var(--card2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:14px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--silver);margin-bottom:10px;">ADD COACH</div>
-      <input id="newCoachName" placeholder="Coach name" maxlength="30"
-        style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:10px;border-radius:8px;margin-bottom:8px;outline:none;">
-      <input id="newCoachRole" placeholder="Role (e.g. Junior Coach)" maxlength="30"
-        style="width:100%;background:var(--card);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:14px;padding:10px;border-radius:8px;margin-bottom:10px;outline:none;">
-      <div style="display:flex;gap:8px;">
-        <button class="btn" style="flex:1;" onclick="document.getElementById('addCoachForm').style.display='none'">CANCEL</button>
-        <button class="btn btn-pink" style="flex:2;" onclick="saveNewCoach()">ADD COACH</button>
-      </div>
-    </div>
-    <div id="adminCoachControls" style="display:none;">
-      <button class="btn btn-sky btn-full" style="margin-bottom:8px;" onclick="document.getElementById('addCoachForm').style.display='block'">+ ADD COACH</button>
-    </div>
-    <button class="modal-close" onclick="closeModal('coachesModal')">CLOSE</button>
-  </div>
-</div>
-
 <!-- SESSION DATE MODAL -->
 <div class="modal-overlay" id="sessionDateModal">
   <div class="modal">
@@ -1431,12 +1407,12 @@ function showUpsell(type) {
 
   } else if (type === 'coaches') {
     icon.textContent = '👥';
-    title.textContent = 'ADD COACHES';
-    subtitle.textContent = 'Manage a team of coaches with a Pro account';
+    title.textContent = 'SHARE WITH YOUR SQUAD';
+    subtitle.textContent = 'One login, your whole coaching team';
     features.innerHTML = `
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--purple);margin-bottom:10px;">WHAT YOU GET WITH PRO</div>
       <div style="font-size:13px;color:var(--silver2);line-height:2;">
-        ✓ Add and manage multiple coaches<br>
+        ✓ Share one login across your squad (best for up to ~5 coaches)<br>
         ✓ Share sessions across your squad<br>
         ✓ Full Build Session access<br>
         ✓ Save unlimited sessions
@@ -1607,29 +1583,6 @@ const sb = {
       });
       return true;
     } catch(e) { console.error('deleteSession:', e); return false; }
-  },
-
-  async getCoaches() { return []; },
-
-  async insertCoach(name, role) {
-    try {
-      const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({ club_id: currentClubId, name, role })
-      });
-      return await r.json();
-    } catch(e) { console.error('insertCoach:', e); return null; }
-  },
-
-  async deleteCoach(id) {
-    try {
-      await fetch(`${SUPABASE_URL}/rest/v1/sc_coaches?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: this.headers
-      });
-      return true;
-    } catch(e) { console.error('deleteCoach:', e); return false; }
   }
 };
 
@@ -2707,56 +2660,6 @@ function loadSavedSession(idx, isShared = false) {
   previewMode = 'view';
   renderPreview();
   showScreen('preview');
-}
-
-// ============================================================
-// COACHES MODAL
-// ============================================================
-function openCoachesModal() {
-  renderCoachesList();
-  document.getElementById('adminCoachControls').style.display = currentRole === 'admin' ? 'block' : 'none';
-  document.getElementById('coachesModal').classList.add('active');
-}
-
-async function renderCoachesList() {
-  const el = document.getElementById('coachesList');
-  el.innerHTML = `<div style="color:var(--silver);font-family:'Barlow Condensed',sans-serif;font-size:12px;padding:10px 0;">Loading...</div>`;
-
-  const coaches = await sb.getCoaches();
-
-  // Always show supervisor at top
-  const rows = [
-    { name: 'Supervisor', role: 'Head Coach / Supervisor', id: null, isSupervisor: true },
-    ...(coaches || []).map(c => ({ name: c.name, role: c.role, id: c.id, isSupervisor: false }))
-  ];
-
-  el.innerHTML = rows.map(c => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--white);">${c.name}</div>
-        <div style="font-size:11px;color:var(--silver);margin-top:2px;">${c.role}</div>
-      </div>
-      ${currentRole === 'admin' && !c.isSupervisor
-        ? `<button class="btn" style="padding:5px 9px;font-size:10px;color:#ff5555;border-color:#ff5555;" onclick="removeCoach('${c.id}',this)">✕</button>`
-        : `<div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;">${c.isSupervisor ? 'SUPERVISOR' : 'COACH'}</div>`}
-    </div>`).join('');
-}
-
-async function saveNewCoach() {
-  const name = document.getElementById('newCoachName').value.trim();
-  const role = document.getElementById('newCoachRole').value.trim() || 'Junior Coach';
-  if (!name) return;
-  await sb.insertCoach(name, role);
-  document.getElementById('newCoachName').value = '';
-  document.getElementById('newCoachRole').value = '';
-  document.getElementById('addCoachForm').style.display = 'none';
-  renderCoachesList();
-}
-
-async function removeCoach(id, btnEl) {
-  btnEl.textContent = '...';
-  await sb.deleteCoach(id);
-  renderCoachesList();
 }
 
 // ============================================================
