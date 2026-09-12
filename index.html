@@ -2657,7 +2657,6 @@ function buildSessionCard(row, idx, isShared, isArchived) {
     </div>
     <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
       ${canShare ? `<button class="btn btn-sky" style="padding:5px 8px;font-size:10px;" onclick="event.stopPropagation();publishExistingSession('${row.id}',this)">SHARE</button>` : ''}
-      ${isPublished && !isShared ? `<span style="font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--purple);letter-spacing:1px;">SHARED</span>` : ''}
       ${canTemplate ? `<button class="btn" style="padding:5px 8px;font-size:10px;color:var(--sky);border-color:var(--sky);" onclick="event.stopPropagation();useAsTemplate(${idx},${isShared})">USE</button>` : ''}
       ${canDelete ? `<button class="btn" style="padding:5px 8px;font-size:10px;color:#ff5555;border-color:#ff5555;" onclick="event.stopPropagation();deleteSession('${row.id}',this)">✕</button>` : ''}
       <div style="color:${isShared?'var(--purple)':'var(--silver)'};font-size:18px;">›</div>
@@ -2670,26 +2669,37 @@ async function renderSavedSessions() {
   const archiveEl = document.getElementById('archiveSessionsList');
   if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">Loading...</div>`;
 
-  let sessions = await sb.getSessions(false);
+  try {
+    let sessions = await sb.getSessions(false);
 
-  if (!sessions || sessions.length === 0) {
-    if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
-    if (archiveEl) archiveEl.innerHTML = `<div class="empty-state">No archived sessions yet.</div>`;
-    cachedSavedSessions = [];
-    return;
+    if (!Array.isArray(sessions)) {
+      console.error('renderSavedSessions: unexpected response', sessions);
+      sessions = [];
+    }
+
+    if (sessions.length === 0) {
+      if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
+      if (archiveEl) archiveEl.innerHTML = `<div class="empty-state">No archived sessions yet.</div>`;
+      cachedSavedSessions = [];
+      return;
+    }
+
+    cachedSavedSessions = sessions;
+    const upcoming = sessions.filter(r => isUpcoming(r));
+    const archived = sessions.filter(r => !isUpcoming(r));
+
+    if (upcomingEl) upcomingEl.innerHTML = upcoming.length
+      ? upcoming.map(row => buildSessionCard(row, sessions.indexOf(row), false, false)).join('')
+      : `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
+
+    if (archiveEl) archiveEl.innerHTML = archived.length
+      ? archived.map(row => buildSessionCard(row, sessions.indexOf(row), false, true)).join('')
+      : `<div class="empty-state">No archived sessions yet.</div>`;
+  } catch(e) {
+    console.error('renderSavedSessions error:', e);
+    if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">Couldn't load sessions — pull to refresh or try again.</div>`;
+    if (archiveEl) archiveEl.innerHTML = `<div class="empty-state">Couldn't load sessions.</div>`;
   }
-
-  cachedSavedSessions = sessions;
-  const upcoming = sessions.filter(r => isUpcoming(r));
-  const archived = sessions.filter(r => !isUpcoming(r));
-
-  if (upcomingEl) upcomingEl.innerHTML = upcoming.length
-    ? upcoming.map(row => buildSessionCard(row, sessions.indexOf(row), false, false)).join('')
-    : `<div class="empty-state">No upcoming sessions.<br>Build your first session above.</div>`;
-
-  if (archiveEl) archiveEl.innerHTML = archived.length
-    ? archived.map(row => buildSessionCard(row, sessions.indexOf(row), false, true)).join('')
-    : `<div class="empty-state">No archived sessions yet.</div>`;
 }
 
 async function renderSharedSessions() {
