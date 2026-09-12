@@ -840,7 +840,7 @@ body {
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">
       <button class="btn btn-pink btn-full" onclick="generateNewSession()" style="padding:14px;">✨ GENERATE ANOTHER</button>
       <button class="btn btn-full" onclick="handleAiSaveClick()" style="padding:14px;color:var(--sky);border-color:var(--sky);">💾 SAVE THIS SESSION</button>
-      <button class="btn btn-full" onclick="showUpsell('customise')" style="padding:14px;color:var(--purple);border-color:var(--purple);">✏️ CUSTOMISE SESSION → PRO</button>
+      <button class="btn btn-full" onclick="showUpsell('customise', currentAiMode)" style="padding:14px;color:var(--purple);border-color:var(--purple);">✏️ CUSTOMISE SESSION → PRO</button>
     </div>
   </div>
 </div>
@@ -1194,6 +1194,7 @@ body {
 // AUTH — EMAIL BASED
 // ============================================================
 let currentUser = null; // { email, tier, mode, club_name }
+let currentDisplayMode = 'junior'; // which mode's home screen is on display, tracked regardless of login state
 let currentRole = 'coach'; // kept for session card logic compatibility
 
 // Comped accounts (free Pro+ access)
@@ -1321,8 +1322,10 @@ function onAuthSuccess() {
     ri.textContent = '★ ELITE'; ri.style.background = 'rgba(224,64,251,0.15)'; ri.style.color = 'var(--pink)'; ri.style.border = '1px solid var(--pink)';
   } else if (tier === 'pro_plus') {
     ri.textContent = '◆ PRO+'; ri.style.background = 'rgba(124,77,255,0.15)'; ri.style.color = 'var(--purple)'; ri.style.border = '1px solid var(--purple)';
-  } else if (tier === 'pro') {
-    ri.textContent = '● PRO'; ri.style.background = 'rgba(64,196,255,0.15)'; ri.style.color = 'var(--sky)'; ri.style.border = '1px solid var(--sky)';
+  } else if (tier === 'pro_junior') {
+    ri.textContent = '● PRO (JNR)'; ri.style.background = 'rgba(64,196,255,0.15)'; ri.style.color = 'var(--sky)'; ri.style.border = '1px solid var(--sky)';
+  } else if (tier === 'pro_masters') {
+    ri.textContent = '● PRO (MSTRS)'; ri.style.background = 'rgba(64,196,255,0.15)'; ri.style.color = 'var(--sky)'; ri.style.border = '1px solid var(--sky)';
   } else {
     ri.textContent = '○ FREE'; ri.style.background = 'rgba(119,119,170,0.15)'; ri.style.color = 'var(--silver)'; ri.style.border = '1px solid var(--silver)';
   }
@@ -1350,7 +1353,14 @@ function onAuthSuccess() {
   showScreen('mode');
 }
 
-function showUpsell(type) {
+// Returns the correct single-mode Pro payment link/label for whichever mode is locked.
+function proLinkForMode(mode) {
+  return mode === 'masters'
+    ? { url: 'https://buy.stripe.com/28EaEYb6n5bn9r04hi0co03', name: 'PRO (Masters)' }
+    : { url: 'https://buy.stripe.com/bJebJ22zReLXcDcbJK0co04', name: 'PRO (Junior)' };
+}
+
+function showUpsell(type, lockedMode) {
   const icon = document.getElementById('upsellIcon');
   const title = document.getElementById('upsellTitle');
   const subtitle = document.getElementById('upsellSubtitle');
@@ -1360,8 +1370,11 @@ function showUpsell(type) {
   const cancelLink = `<div style="text-align:center;margin-top:10px;"><a href="https://billing.stripe.com/p/login/8x2aEY0rJeLXeLk29a0co01" target="_blank" style="font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--silver);letter-spacing:1px;">Cancel subscription</a></div>`;
 
   if (type === 'masters') {
+    const mode = lockedMode || 'masters';
+    const modeLabel = mode === 'junior' ? 'JUNIOR' : 'MASTERS';
+    const proLink = proLinkForMode(mode);
     icon.textContent = '🏅';
-    title.textContent = 'UNLOCK MASTERS MODE';
+    title.textContent = `UNLOCK ${modeLabel} MODE`;
     subtitle.textContent = 'AI sessions are free — upgrade to build and save your own';
     features.innerHTML = `
       <div style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;color:var(--sky);margin-bottom:10px;">WHAT YOU GET WITH PRO+</div>
@@ -1372,7 +1385,7 @@ function showUpsell(type) {
       </div>`;
     options.innerHTML = `
       <a href="https://buy.stripe.com/8x2aEY0rJeLXeLk29a0co01" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">UPGRADE TO PRO+ — $10/mo</a>
-      <a href="https://buy.stripe.com/9B614odev7jv6eOg000co02" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--sky);border-color:var(--sky);padding:14px;">PRO (Junior only) — $5/mo</a>
+      <a href="${proLink.url}" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--sky);border-color:var(--sky);padding:14px;">${proLink.name} — $5/mo</a>
       ${cancelLink}`;
 
   } else if (type === 'elite') {
@@ -1392,6 +1405,8 @@ function showUpsell(type) {
       ${cancelLink}`;
 
   } else if (type === 'customise') {
+    const mode = lockedMode || 'junior';
+    const proLink = proLinkForMode(mode);
     icon.textContent = '✏️';
     title.textContent = 'CUSTOMISE THIS SESSION';
     subtitle.textContent = 'Upgrade to build and save your own sessions';
@@ -1403,7 +1418,7 @@ function showUpsell(type) {
         ✓ Edit and customise any session
       </div>`;
     options.innerHTML = `
-      <a href="https://buy.stripe.com/9B614odev7jv6eOg000co02" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">UPGRADE TO PRO — $5/mo</a>
+      <a href="${proLink.url}" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;background:linear-gradient(135deg,var(--purple),var(--pink));color:var(--white);border:none;margin-bottom:8px;padding:14px;">UPGRADE TO ${proLink.name} — $5/mo</a>
       <a href="https://buy.stripe.com/8x2aEY0rJeLXeLk29a0co01" target="_blank" class="btn btn-full" style="display:block;text-align:center;text-decoration:none;color:var(--purple);border-color:var(--purple);padding:14px;">PRO+ (Junior &amp; Masters) — $10/mo</a>
       ${cancelLink}`;
 
@@ -1510,6 +1525,7 @@ function openAuthModal(tab) {
 
 function selectMode(mode) {
   if (currentUser) currentUser.mode = mode;
+  currentDisplayMode = mode;
   const modeLabels = { junior: 'JUNIOR SQUAD', masters: 'MASTERS', elite: 'SSA — ELITE' };
   const homeSubs = { junior: 'Junior Squad Session Builder', masters: 'Masters Session Builder', elite: 'Swim Set Architect' };
   document.getElementById('headerSubtitle').textContent = modeLabels[mode] || 'SWIM SESSION BUILDER';
@@ -1606,7 +1622,7 @@ const sb = {
         body: JSON.stringify({
           user_email: currentUser.email,
           session_data: sessionData,
-          mode: currentUser.mode || 'junior',
+          mode: sessionData.type || currentUser.mode || 'junior',
           is_ai_generated: isAiGenerated
         })
       });
@@ -1755,19 +1771,36 @@ const GAMES = [
 // ============================================================
 // HOME BUTTONS — dynamic based on tier
 // ============================================================
+// Does the current user's tier include Build/Save access for a given mode?
+// Elite and Pro+ cover both Junior and Masters. Plain Pro covers Junior only.
+// AI Generate itself is never restricted by this — it stays free for everyone.
+function canAccessMode(mode) {
+  if (!currentUser) return false;
+  const tier = currentUser.tier;
+  if (tier === 'elite' || tier === 'pro_plus') return true;
+  if (tier === 'pro_junior') return mode === 'junior';
+  if (tier === 'pro_masters') return mode === 'masters';
+  return false;
+}
+
 function renderHomeButtons() {
   const el = document.getElementById('homeButtons');
-  const tier = currentUser ? currentUser.tier : 'free';
-  const isPaid = tier === 'pro' || tier === 'pro_plus' || tier === 'elite';
+  const mode = currentDisplayMode;
+  const canBuild = canAccessMode(mode);
 
-  if (isPaid) {
+  if (canBuild) {
     el.innerHTML = `
       <button class="build-btn" onclick="startBuild()">+ BUILD SESSION</button>
       <button class="btn btn-full" onclick="startAiGenerate()" style="margin-top:8px;color:var(--purple);border-color:var(--purple);padding:12px;">✨ AI GENERATE SESSION</button>`;
+  } else if (currentUser) {
+    // Logged in, but this tier doesn't cover this mode (e.g. Pro Junior viewing Masters)
+    el.innerHTML = `
+      <button class="build-btn" style="background:linear-gradient(135deg,var(--purple),var(--pink));" onclick="startAiGenerate()">✨ AI GENERATE SESSION</button>
+      <button class="btn btn-full" onclick="showUpsell('masters', '${mode}')" style="margin-top:8px;color:var(--silver);border-color:var(--border2);padding:12px;">+ BUILD YOUR OWN → PRO+</button>`;
   } else {
     el.innerHTML = `
       <button class="build-btn" style="background:linear-gradient(135deg,var(--purple),var(--pink));" onclick="startAiGenerate()">✨ AI GENERATE SESSION</button>
-      <button class="btn btn-full" onclick="showUpsell('customise')" style="margin-top:8px;color:var(--silver);border-color:var(--border2);padding:12px;">+ BUILD YOUR OWN → PRO</button>`;
+      <button class="btn btn-full" onclick="showUpsell('customise', '${mode}')" style="margin-top:8px;color:var(--silver);border-color:var(--border2);padding:12px;">+ BUILD YOUR OWN → PRO</button>`;
   }
 }
 
@@ -1786,7 +1819,7 @@ function pickN(arr, n) {
 }
 
 function startAiGenerate() {
-  currentAiMode = currentUser ? currentUser.mode : (document.getElementById('homeModeSub').textContent.toLowerCase().includes('masters') ? 'masters' : 'junior');
+  currentAiMode = currentDisplayMode;
   showScreen('aigenerate');
   document.getElementById('aiGenerateLoading').style.display = 'none';
   document.getElementById('aiGenerateResult').style.display = 'none';
@@ -2524,6 +2557,7 @@ let calYear, calMonth, calSelectedDate;
 
 function handleAiSaveClick() {
   if (!currentUser) { showUpsell('save'); return; }
+  if (!canAccessMode(currentAiSession ? currentAiSession.type : null)) { showUpsell('masters', currentAiSession ? currentAiSession.type : null); return; }
   openSaveModal();
   pendingSaveIsAi = true;
 }
@@ -2598,6 +2632,13 @@ function formatSessionName(dateVal) {
 async function confirmSaveSession() {
   if (!calSelectedDate) {
     alert('Please select a date first.');
+    return;
+  }
+  const targetSession = pendingSaveIsAi ? currentAiSession : session;
+  if (!canAccessMode(targetSession ? targetSession.type : null)) {
+    closeModal('sessionDateModal');
+    pendingSaveIsAi = false;
+    showUpsell('masters', targetSession ? targetSession.type : null);
     return;
   }
   const dateVal = calSelectedDate;
@@ -2777,7 +2818,11 @@ function closeModal(id) {
 }
 
 function startBuild() {
-  session = { warmup: null, blocks: [], game: null, name: '' };
+  if (!canAccessMode(currentDisplayMode)) {
+    showUpsell('masters', currentDisplayMode);
+    return;
+  }
+  session = { warmup: null, blocks: [], game: null, name: '', type: currentDisplayMode };
   renderWarmupList();
   showScreen('warmup');
 }
