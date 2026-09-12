@@ -839,7 +839,7 @@ body {
 
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;">
       <button class="btn btn-pink btn-full" onclick="generateNewSession()" style="padding:14px;">✨ GENERATE ANOTHER</button>
-      <button class="btn btn-full" onclick="showUpsell('save')" style="padding:14px;color:var(--sky);border-color:var(--sky);">💾 SAVE THIS SESSION</button>
+      <button class="btn btn-full" onclick="handleAiSaveClick()" style="padding:14px;color:var(--sky);border-color:var(--sky);">💾 SAVE THIS SESSION</button>
       <button class="btn btn-full" onclick="showUpsell('customise')" style="padding:14px;color:var(--purple);border-color:var(--purple);">✏️ CUSTOMISE SESSION → PRO</button>
     </div>
   </div>
@@ -1313,6 +1313,7 @@ async function verifyPassword(password, storedHash) {
 
 function onAuthSuccess() {
   const tier = currentUser.tier;
+  localStorage.setItem('sc_current_user_email', currentUser.email);
 
   // Set role indicator
   const ri = document.getElementById('roleIndicator');
@@ -1522,6 +1523,7 @@ function selectMode(mode) {
 function signOut() {
   currentUser = null;
   currentRole = 'coach';
+  localStorage.removeItem('sc_current_user_email');
   // Reset mode screen to guest state
   document.getElementById('modeUserBadge').style.display = 'none';
   document.getElementById('modeSignInLink').style.display = 'inline';
@@ -1775,6 +1777,7 @@ function renderHomeButtons() {
 let currentPoolLength = 25;
 let currentAiMode = 'junior';
 let currentAiSession = null;
+let pendingSaveIsAi = false;
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function pickN(arr, n) {
@@ -2519,7 +2522,14 @@ function renderPreview() {
 // ============================================================
 let calYear, calMonth, calSelectedDate;
 
+function handleAiSaveClick() {
+  if (!currentUser) { showUpsell('save'); return; }
+  openSaveModal();
+  pendingSaveIsAi = true;
+}
+
 function openSaveModal() {
+  pendingSaveIsAi = false;
   const today = new Date();
   calYear = today.getFullYear();
   calMonth = today.getMonth();
@@ -2594,15 +2604,17 @@ async function confirmSaveSession() {
   closeModal('sessionDateModal');
 
   const name = formatSessionName(dateVal);
-  session.name = name;
-  session.savedAt = new Date().toISOString();
-  session.sessionDate = dateVal;
+  const target = pendingSaveIsAi ? currentAiSession : session;
+  target.name = name;
+  target.savedAt = new Date().toISOString();
+  target.sessionDate = dateVal;
 
   const localSaved = loadFromStorage('sc_sessions') || [];
-  localSaved.unshift(JSON.parse(JSON.stringify(session)));
+  localSaved.unshift(JSON.parse(JSON.stringify(target)));
   saveToStorage('sc_sessions', localSaved);
 
-  await sb.insertSession(session, false);
+  await sb.insertSession(target, pendingSaveIsAi);
+  pendingSaveIsAi = false;
   renderSavedSessions();
   showScreen('home');
 }
@@ -2789,6 +2801,28 @@ function loadFromStorage(key) {
 const now = new Date();
 document.getElementById('headerDate').textContent =
   now.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' }).toUpperCase();
+
+// Restore a signed-in user on return visits. We only ever cache the email —
+// tier is always re-fetched fresh here so a cancelled/upgraded subscription
+// is reflected immediately rather than trusting a stale local copy.
+(async function restoreSession() {
+  const savedEmail = localStorage.getItem('sc_current_user_email');
+  if (!savedEmail) return;
+
+  try {
+    const user = await sb.getUser(savedEmail);
+    if (!user) {
+      localStorage.removeItem('sc_current_user_email');
+      return;
+    }
+    let tier = user.tier;
+    if (COMPED_EMAILS.includes(savedEmail) && tier === 'free') tier = 'pro_plus';
+    currentUser = { email: user.email, tier, mode: user.mode, club_name: user.club_name };
+    onAuthSuccess();
+  } catch(e) {
+    console.error('restoreSession:', e);
+  }
+})();
 </script>
 </body>
 </html>
