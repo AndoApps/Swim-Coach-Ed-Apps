@@ -1155,6 +1155,22 @@ body {
   </div>
 </div>
 
+<!-- EMAIL GATE MODAL -->
+<div class="modal-overlay" id="emailGateModal">
+  <div class="modal" style="margin-top:100px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:32px;margin-bottom:8px;">✨</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--white);">ALMOST THERE</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--silver);letter-spacing:1px;margin-top:4px;">Enter your email to generate your free session</div>
+    </div>
+    <input type="email" id="emailGateInput" placeholder="your@email.com"
+      style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--white);font-family:'Barlow',sans-serif;font-size:15px;padding:12px;border-radius:8px;margin-bottom:6px;outline:none;">
+    <div id="emailGateError" style="display:none;color:#ff5555;font-size:11px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;margin-bottom:10px;"></div>
+    <button class="btn btn-pink btn-full" style="margin-top:8px;" onclick="submitEmailGate()" id="emailGateBtn">GENERATE MY SESSION →</button>
+    <div style="text-align:center;margin-top:10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:var(--silver);letter-spacing:1px;">No password needed. We'll never spam you.</div>
+  </div>
+</div>
+
 <!-- UPSELL MODAL -->
 <div class="modal-overlay" id="upsellModal">
   <div class="modal" style="margin-top:60px;">
@@ -1528,6 +1544,17 @@ const sb = {
     };
   },
 
+  async saveLead(email, mode) {
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/sc_leads`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ email, mode })
+      });
+      return true;
+    } catch(e) { console.error('saveLead:', e); return false; }
+  },
+
   async getUser(email) {
     try {
       const r = await fetch(`${SUPABASE_URL}/rest/v1/sc_users?email=eq.${encodeURIComponent(email)}&limit=1`, { headers: this.headers });
@@ -1767,6 +1794,43 @@ function selectPoolLength(len) {
 }
 
 function generateNewSession() {
+  // Email gate: capture an email once per browser before the first
+  // generate, then never ask again on this device.
+  if (!currentUser && !localStorage.getItem('sc_lead_email')) {
+    document.getElementById('emailGateInput').value = '';
+    document.getElementById('emailGateError').style.display = 'none';
+    document.getElementById('emailGateModal').classList.add('active');
+    return;
+  }
+  runGenerateSession();
+}
+
+function submitEmailGate() {
+  const input = document.getElementById('emailGateInput');
+  const email = input.value.trim().toLowerCase();
+  const errorEl = document.getElementById('emailGateError');
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!emailPattern.test(email)) {
+    errorEl.textContent = 'Please enter a valid email address.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  const btn = document.getElementById('emailGateBtn');
+  btn.textContent = 'SAVING...';
+  btn.disabled = true;
+
+  localStorage.setItem('sc_lead_email', email);
+  sb.saveLead(email, currentAiMode);
+
+  closeModal('emailGateModal');
+  btn.textContent = 'GENERATE MY SESSION →';
+  btn.disabled = false;
+  runGenerateSession();
+}
+
+function runGenerateSession() {
   document.getElementById('aiGenerateLoading').style.display = 'block';
   document.getElementById('aiGenerateResult').style.display = 'none';
 
