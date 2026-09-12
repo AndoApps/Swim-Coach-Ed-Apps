@@ -1591,10 +1591,10 @@ const sb = {
     } catch(e) { console.error('createUser:', e); return null; }
   },
 
-  async getSessions(publishedOnly = false) {
+  async getSessions(mode, publishedOnly = false) {
     try {
       if (!currentUser) return [];
-      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?user_email=eq.${encodeURIComponent(currentUser.email)}&order=session_data->>sessionDate.asc,created_at.desc`;
+      let url = `${SUPABASE_URL}/rest/v1/sc_sessions?user_email=eq.${encodeURIComponent(currentUser.email)}&mode=eq.${encodeURIComponent(mode)}&order=session_data->>sessionDate.asc,created_at.desc`;
       if (publishedOnly) url += '&is_ai_generated=eq.false';
       const r = await fetch(url, { headers: this.headers });
       return await r.json();
@@ -2670,7 +2670,7 @@ async function renderSavedSessions() {
   if (upcomingEl) upcomingEl.innerHTML = `<div class="empty-state">Loading...</div>`;
 
   try {
-    let sessions = await sb.getSessions(false);
+    let sessions = await sb.getSessions(currentUser ? currentUser.mode : null, false);
 
     if (!Array.isArray(sessions)) {
       console.error('renderSavedSessions: unexpected response', sessions);
@@ -2707,7 +2707,7 @@ async function renderSharedSessions() {
   const el = document.getElementById('sharedSessionsList');
   if (!section || !el) return;
 
-  const published = await sb.getSessions(true);
+  const published = await sb.getSessions(currentUser ? currentUser.mode : null, true);
   if (!published || published.length === 0) { section.style.display = 'none'; return; }
 
   cachedSharedSessions = published;
