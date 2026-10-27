@@ -71,6 +71,10 @@
     font-size:clamp(13px,1.3vw,18px); color:var(--muted); font-variant-numeric:tabular-nums;
   }
 
+  .header-right{ display:flex; align-items:baseline; gap:16px; }
+  #awakeBadge{ font-family:var(--font-display); letter-spacing:0.06em; font-size:clamp(10px,1vw,13px); text-transform:uppercase; white-space:nowrap; }
+  #awakeBadge.on{ color:#3ddc84; opacity:0.8; }
+  #awakeBadge.off{ color:var(--amber); }
   .mode-tabs{ display:flex; gap:6px; }
   .mode-tab{
     padding:6px 14px; font-size:11px; font-family:var(--font-display); font-weight:600;
@@ -157,15 +161,24 @@
   .lane-edit .stepper .stepper-display{ font-size:13px; padding:5px 2px; width:auto; flex:1; }
   .lane-edit .stepper .step-btn{ width:22px; font-size:13px; }
 
+  /* Ribbon is a single line: sizes scale with screen width so it still fits
+     on an iPad (about 1024px wide) with the Assign Lanes button showing. */
+  #defaultsPanel{ flex-wrap:nowrap; gap:clamp(5px,0.8vw,14px); padding:10px clamp(8px,1.2vw,18px); align-items:flex-end; }
+  #defaultsPanel .panel-title{ display:none; }
+  #defaultsPanel .field label{ font-size:clamp(9px,1vw,13px); white-space:nowrap; }
   #defaultsPanel .stepper .stepper-display{
-    font-size:20px; padding:8px 4px; width:66px; font-weight:600;
+    font-size:clamp(15px,1.8vw,20px); padding:8px 1px; width:clamp(34px,4vw,66px); font-weight:600;
   }
   #defaultsPanel .stepper .step-btn{
-    width:36px; font-size:22px;
+    width:clamp(25px,2.7vw,36px); font-size:19px;
   }
   #defaultsPanel .btn-sm, #defaultsPanel .btn-primary, #defaultsPanel .btn-release{
-    font-size:15px; padding:12px 20px;
+    font-size:clamp(10px,1.15vw,15px); padding:12px clamp(6px,1vw,18px); white-space:nowrap; letter-spacing:0.03em;
   }
+  #defaultsPanel .btn-sm, #defaultsPanel .btn-primary, #defaultsPanel .btn-release, #defaultsPanel #assignLanesBtn{ min-height:44px; }
+  #defaultsPanel .panel-actions{ gap:clamp(4px,0.6vw,8px); flex-shrink:0; }
+  #defaultsPanel .field{ flex-shrink:0; }
+  #defaultsPanel #assignLanesBtn{ padding:12px clamp(6px,0.9vw,16px); }
 
   button{
     font-family:var(--font-display); font-weight:600; letter-spacing:0.05em;
@@ -402,7 +415,7 @@
     <button class="mode-tab active" id="modeLaneBtn">Lane Board</button>
     <button class="mode-tab" id="modePaceBtn">Pace Clock</button>
   </div>
-  <div id="clockOfDay">--:--:--</div>
+  <div class="header-right"><span id="awakeBadge" class="off"></span><div id="clockOfDay">--:--:--</div></div>
 </header>
 
 <div id="laneBoardView" style="display:flex; flex-direction:column; flex:1; min-height:0;">
@@ -426,7 +439,7 @@
     </div>
   </div>
   <div class="field">
-    <label>Distance (m)</label>
+    <label>Dist (m)</label>
     <div class="stepper" data-step="25" data-min="25">
       <button type="button" class="step-btn step-minus">−</button>
       <input type="text" id="dDistance" class="stepper-display" value="100" readonly data-value="100">
@@ -434,13 +447,17 @@
     </div>
   </div>
   <div class="field">
-    <label>Interval (m:ss)</label>
+    <label>Interval</label>
     <div class="stepper" data-step="5" data-min="5">
       <button type="button" class="step-btn step-minus">−</button>
       <input type="text" id="dInterval" class="stepper-display" value="1:10" readonly data-value="70">
       <button type="button" class="step-btn step-plus">+</button>
     </div>
   </div>
+  <!-- Groups / Stagger / Between sets / Rest live off the ribbon now (they keep
+       their defaults and are changed per lane or per cycle). The controls stay
+       in the page, hidden, so the rest of the code can still read them. -->
+  <div id="ribbonHidden" style="display:none;">
   <div class="field">
     <label>Groups</label>
     <div class="stepper" data-step="1" data-min="1">
@@ -462,7 +479,7 @@
     <select id="dBetween">
       <option value="straight">Straight in</option>
       <option value="rest">Rest</option>
-      <option value="manual">Manual (tap)</option>
+      <option value="manual" selected>Manual (tap)</option>
     </select>
   </div>
   <div class="field" id="dRestWrap" style="display:none;">
@@ -473,6 +490,8 @@
       <button type="button" class="step-btn step-plus">+</button>
     </div>
   </div>
+  </div><!-- /ribbonHidden -->
+
   <div class="field">
     <label>Cycles</label>
     <div class="stepper" data-step="1" data-min="0" data-max="11">
@@ -655,7 +674,7 @@ function laneLabel(id){
 }
 
 function defaultConfig(){
-  return { sets:3, reps:4, distance:100, interval:70, betweenMode:'straight', restSec:20, groups:1, staggerSec:5, cycle:0 };
+  return { sets:3, reps:4, distance:100, interval:70, betweenMode:'manual', restSec:20, groups:1, staggerSec:5, cycle:0 };
 }
 
 // Cycle 1-N shared timing settings — a brand-new cycle slot inherits whatever
@@ -664,7 +683,7 @@ function defaultConfig(){
 // screen and its groups/stagger/between/rest can be tweaked later on its
 // own big tile. startDelay holds a cycle back at session start so a faster
 // cycle can be timed to finish alongside a slower one.
-let cycles = Array.from({length:MAX_LANES}, ()=>({ interval:70, groups:1, staggerSec:5, betweenMode:'straight', restSec:20, startDelay:0 }));
+let cycles = Array.from({length:MAX_LANES}, ()=>({ interval:70, groups:1, staggerSec:5, betweenMode:'manual', restSec:20, startDelay:0 }));
 let cyclesInitialized = 0; // highest cycle index (1-based) that has ever been seeded
 let cycleCount = 0;
 let editingCycle = null;
@@ -814,26 +833,20 @@ document.getElementById('cycleAssignDone').addEventListener('click', ()=>{
 });
 
 document.getElementById('applyAll').addEventListener('click', ()=>{
+  // Apply All only pushes what is visible on the ribbon: sets, reps, distance
+  // and interval. Groups / stagger / between-sets / rest are no longer on the
+  // ribbon, so they are left exactly as set on each lane or cycle.
   const cfg = {
     sets: getStepperValue(document, '#dSets'),
     reps: getStepperValue(document, '#dReps'),
     distance: getStepperValue(document, '#dDistance'),
-    interval: getStepperValue(document, '#dInterval'),
-    betweenMode: dBetween.value,
-    restSec: getStepperValue(document, '#dRestSec'),
-    groups: getStepperValue(document, '#dGroups'),
-    staggerSec: getStepperValue(document, '#dStagger')
+    interval: getStepperValue(document, '#dInterval')
   };
   lanes.forEach(lane=>{
-    lane.config = {...cfg, cycle: lane.config.cycle};
+    lane.config = {...lane.config, ...cfg};
     lane.editing = false;
     lane.runtime = { phase:'idle', remaining:0, currentSet:1, currentRep:1 };
   });
-  // Push groups/stagger/between/rest to every cycle too — interval is left
-  // alone since cycles usually run different intervals on purpose.
-  for(let i = 0; i < cycleCount; i++){
-    cycles[i] = { ...cycles[i], groups:cfg.groups, staggerSec:cfg.staggerSec, betweenMode:cfg.betweenMode, restSec:cfg.restSec };
-  }
   render();
 });
 
@@ -1588,23 +1601,73 @@ function saveCycleEdit(cycleIndex, el){
 
 render();
 
-/* ---------------- Keep the screen awake while this is open ---------------- */
+/* ---------------- Keep the screen awake while this is open ----------------
+   Two layers, because iPads are fussy:
+   1) the Screen Wake Lock API (works in Safari; in Home Screen apps only on newer iPadOS)
+   2) a tiny silent looping video — iPadOS won't auto-lock while a video is playing.
+      Browsers only let a video start after a tap, so it kicks in on the first touch. */
 let wakeLock = null;
+let sleepVideo = null;
+const NOSLEEP_MP4  = 'data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAANKbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAB9AAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAnR0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAB9AAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAEAAAABAAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAfQAAAAAAABAAAAAAHsbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAoAAAAUABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABl21pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAVdzdGJsAAAAt3N0c2QAAAAAAAAAAQAAAKdhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAEAAQABIAAAASAAAAAAAAAABFUxhdmM2MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAALWF2Y0MBQsAK/+EAFmdCwAraEJsBEAAAAwAQAAADAKDxImoBAARozg/IAAAAEHBhc3AAAAABAAAAAQAAABRidHJ0AAAAAAAAC6wAAAusAAAAGHN0dHMAAAAAAAAAAQAAAAoAAAgAAAAAFHN0c3MAAAAAAAAAAQAAAAEAAAAcc3RzYwAAAAAAAAABAAAAAQAAAAoAAAABAAAAPHN0c3oAAAAAAAAAAAAAAAoAAAKRAAAACgAAAAoAAAAKAAAACgAAAAoAAAAKAAAACgAAAAoAAAAKAAAAFHN0Y28AAAAAAAAAAQAAA3oAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjYwLjE2LjEwMAAAAAhmcmVlAAAC821kYXQAAAJvBgX//2vcRem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTY0IHIzMTA4IDMxZTE5ZjkgLSBILjI2NC9NUEVHLTQgQVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDIzIC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcveDI2NC5odG1sIC0gb3B0aW9uczogY2FiYWM9MCByZWY9MSBkZWJsb2NrPTE6MDowIGFuYWx5c2U9MHgxOjB4MTExIG1lPWhleCBzdWJtZT0yIHBzeT0xIHBzeV9yZD0xLjAwOjAuMDAgbWl4ZWRfcmVmPTAgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0wIDh4OGRjdD0wIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJvbWFfcXBfb2Zmc2V0PTAgdGhyZWFkcz0yIGxvb2thaGVhZF90aHJlYWRzPTEgc2xpY2VkX3RocmVhZHM9MCBucj0wIGRlY2ltYXRlPTEgaW50ZXJsYWNlZD0wIGJsdXJheV9jb21wYXQ9MCBjb25zdHJhaW5lZF9pbnRyYT0wIGJmcmFtZXM9MCB3ZWlnaHRwPTAga2V5aW50PTI1MCBrZXlpbnRfbWluPTUgc2NlbmVjdXQ9NDAgaW50cmFfcmVmcmVzaD0wIHJjX2xvb2thaGVhZD0xMCByYz1jcmYgbWJ0cmVlPTEgY3JmPTIzLjAgcWNvbXA9MC42MCBxcG1pbj0wIHFwbWF4PTY5IHFwc3RlcD00IGlwX3JhdGlvPTEuNDAgYXE9MToxLjAwAIAAAAAaZYiEBH///w9FAAEqvycnJ1111111111114AAAAAGQZogEfCMAAAABkGaQBHwjAAAAAZBmmAR8IwAAAAGQZqAEfCMAAAABkGaoBHwjAAAAAZBmsAR8IwAAAAGQZrgEfCMAAAABkGbABDwjAAAAAZBmyA/wjA=';
+const NOSLEEP_WEBM = 'data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAALCEU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggEeTbuMU6uEHFO7a1OsggKs7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjAuMTYuMTAwV0GNTGF2ZjYwLjE2LjEwMESJiECfQAAAAAAAFlSua8GuAQAAAAAAADjXgQFzxYi96q7GsyLx05yBACK1nIN1bmSIgQCGhVZfVlA4g4EBI+ODhAvrwgDgibCBQLqBQJqBAhJUw2f8c3OgY8CAZ8iaRaOHRU5DT0RFUkSHjUxhdmY2MC4xNi4xMDBzc9ZjwItjxYi96q7GsyLx02fIoUWjh0VOQ09ERVJEh5RMYXZjNjAuMzEuMTAyIGxpYnZweGfIoUWjiERVUkFUSU9ORIeTMDA6MDA6MDIuMDAwMDAwMDAwAB9DtnVBB+eBAKOqgQAAgPACAJ0BKkAAQAAARwiFhYiFhIgCAgAGcDxCYAqyIPcwAP7/q1CAo5aBAMgA0QEAARAQABgAGFgv9AAIjoAAo5aBAZAA0QEAARAQABgAGFgv9AAIjoAAo5aBAlgA0QEAARAQABgAGFgv9AAIjoAAo5aBAyAA0QEAARAQABgAGFgv9AAIjoAAo5aBA+gA0QEAARAQABgAGFgv9AAIjoAAo5aBBLAA0QEAARAQABgAGFgv9AAIjoAAo5aBBXgA0QEAARAQFGAAYWC/0AAiOgAAo5aBBkAA0QEAARAQABgAGFgv9AAIjoAAo5aBBwgA0QEAARAQABgAGFgv9AAIjoAAHFO7a5G7j7OBALeK94EB8YIBn/CBAw==';
+
+function isAwake(){
+  return !!wakeLock || (sleepVideo && !sleepVideo.paused && !sleepVideo.ended);
+}
+function updateAwakeBadge(){
+  const b = document.getElementById('awakeBadge');
+  if(!b) return;
+  if(isAwake()){ b.textContent = '\u25CF Screen awake'; b.className = 'on'; }
+  else { b.textContent = '\u25CB Tap screen to stay awake'; b.className = 'off'; }
+}
 async function requestWakeLock(){
   try {
-    if('wakeLock' in navigator){
-      wakeLock = await navigator.wakeLock.request('screen');
+    if('wakeLock' in navigator && !wakeLock && document.visibilityState === 'visible'){
+      const lock = await navigator.wakeLock.request('screen');
+      wakeLock = lock;
+      lock.addEventListener('release', ()=>{ if(wakeLock === lock) wakeLock = null; updateAwakeBadge(); });
     }
   } catch(e){
-    // Not supported, or permission/battery-saver blocked it — silently ignore.
+    wakeLock = null; // not supported or refused — the video layer below still covers it
   }
+  updateAwakeBadge();
 }
+function startSleepVideo(){
+  try {
+    if(!sleepVideo){
+      const v = document.createElement('video');
+      v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+      v.setAttribute('muted', ''); v.muted = true; v.loop = true;
+      v.setAttribute('aria-hidden', 'true'); v.tabIndex = -1;
+      v.style.cssText = 'position:fixed;left:0;top:0;width:2px;height:2px;opacity:0.02;pointer-events:none;z-index:-1;';
+      [[NOSLEEP_MP4,'video/mp4'],[NOSLEEP_WEBM,'video/webm']].forEach(([src,type])=>{
+        const s = document.createElement('source'); s.src = src; s.type = type; v.appendChild(s);
+      });
+      v.addEventListener('play', updateAwakeBadge);
+      v.addEventListener('pause', updateAwakeBadge);
+      document.body.appendChild(v);
+      sleepVideo = v;
+    }
+    if(sleepVideo.paused){
+      const pr = sleepVideo.play();
+      if(pr && pr.then) pr.then(updateAwakeBadge).catch(()=>updateAwakeBadge());
+    }
+  } catch(e){}
+  updateAwakeBadge();
+}
+function keepAwake(){ requestWakeLock(); startSleepVideo(); }
+
 requestWakeLock();
+updateAwakeBadge();
+// Any touch counts as the "user gesture" the browser needs for the video layer.
+document.addEventListener('pointerdown', keepAwake, {passive:true});
+document.addEventListener('touchend', keepAwake, {passive:true});
 document.addEventListener('visibilitychange', ()=>{
-  // The lock is auto-released whenever the tab is hidden/minimised, so
-  // re-request it the moment the tab becomes visible again.
-  if(document.visibilityState === 'visible') requestWakeLock();
+  // Both layers are dropped when the app is hidden — re-arm when it comes back.
+  if(document.visibilityState === 'visible'){ wakeLock = null; keepAwake(); }
 });
+// Safety net: if something has let go (battery saver, etc.), grab it again.
+setInterval(()=>{ if(!isAwake() && document.visibilityState === 'visible') keepAwake(); }, 15000);
 
 /* ---------------- Keyboard: space to start/pause, R to reset ---------------- */
 document.addEventListener('keydown', (e)=>{

@@ -1,6 +1,6 @@
 // Lane Board offline cache. Bump VERSION whenever index.html changes so
 // devices pick up the new copy (they also refresh quietly in the background).
-const VERSION = 'laneboard-v34';
+const VERSION = 'laneboard-v35';
 const FILES = ['./', 'index.html', 'manifest.webmanifest',
   'icons/apple-touch-icon.png', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png'];
 
